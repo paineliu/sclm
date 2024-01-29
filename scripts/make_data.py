@@ -17,7 +17,7 @@ from opencc import OpenCC
 import sys
 sys.path.extend(['.','..'])
 
-from lib.logger import Logger
+from utils.logger import Logger
 
 punctuation = set("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~.,;《》？！“”‘’@#￥%…&×（）——+【】{};；●，。&～、|\s:：\n")
 en_punctuation = ",().!;:"
@@ -967,7 +967,7 @@ def stat_parquet_data_lines(parquet_file: str=None) -> None:
 
 if __name__ == '__main__':
 
-    log = Logger('data_process', save2file=True, file_name='./logs/raw_data_process.log')
+    log = Logger('data_process', save2file=True, file_name='./logs/make_data.log')
     recreate = True
 
     # =================================================================
