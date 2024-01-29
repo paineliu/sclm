@@ -1,4 +1,3 @@
-import sentencepiece as spm
 from fastparquet import ParquetFile
 import tokenizers
 from tokenizers import Tokenizer, decoders
@@ -6,17 +5,16 @@ from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Punctuation, Digits, Metaspace
 from tokenizers.normalizers import NFKC 
-from jieba import lcut
 from multiprocessing import RLock, Pool
 from multiprocessing.managers import BaseManager
 import os 
 from collections import defaultdict
 
-def train_hf_bpe_tokenizer(corpus_filename, token_pathname, max_train_line: int=None) -> None:
+def train_hf_bpe_tokenizer(corpus_filename, token_filename, max_train_line: int=None) -> None:
     '''
     训练tokenizer with huggingface，至少需要32G内存，运行大概需要半个小时。
     '''
-    os.makedirs(token_pathname, exist_ok=True)
+    os.makedirs(os.path.dirname(token_filename), exist_ok=True)
 
     def get_training_corpus(buffer_size: int=1000, chunk_len: int=2048) -> list:
         '''
@@ -73,8 +71,8 @@ def train_hf_bpe_tokenizer(corpus_filename, token_pathname, max_train_line: int=
     if '\n' not in tokenizer.get_vocab():
         tokenizer.add_tokens(['\n'])
 
-    tokenizer.save(token_pathname)
+    tokenizer.save(token_filename)
 
 if __name__ == '__main__':
 
-    train_hf_bpe_tokenizer('./data/raw/zhwiki/zhwiki_cn.txt', './output/hf_bpe_tokenizer')
+    train_hf_bpe_tokenizer('./data/raw/zhwiki/zhwiki_cn.txt', './output/hf_bpe_tokenizer.json')
