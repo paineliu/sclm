@@ -6,3 +6,4 @@ rich
 pyarrow
 opencc_python_reimplemented
 colorlog
+tokenizers
