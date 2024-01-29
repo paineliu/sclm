@@ -69,7 +69,7 @@ def write_single_parquet_file(file_name: str, data_frame: pd.DataFrame) -> None:
     '''
     将dataframe写到单独的parquet file中
     '''
-    write(file_name, data_frame, compression='GZIP', append=exists(file_name))
+    write(file_name, data_frame, compression='GZIP', append=os.path.isfile(file_name))
 
 def read_and_write_template(read_file: str, write_to_file: str, call_back: object, group_cnt: int=10000) -> None:
     '''

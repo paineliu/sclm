@@ -1,0 +1,8 @@
+ujson
+matplotlib
+fastparquet
+numpy
+rich
+pyarrow
+opencc_python_reimplemented
+colorlog
