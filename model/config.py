@@ -11,7 +11,9 @@ class InferConfig:
     mixed_precision: str = "bf16"                   # 混合精度 ''no','fp16','bf16' or 'fp8'
 
     # 全量DPO模型文件
-    model_dir: str = './output/model_save/'
+    tokenizer_dir: str     = './output/tokenizer'
+
+    model_file: str = './output/model/cbot_model.bin'
 
     # lora PDO 合并后的模型文件
     # model_file: str = './model_save/chat_small_t5.best.dpo.lora_merged.bin'
@@ -85,10 +87,10 @@ class TrainConfig:
         self.test_file: str  = os.path.join(self.dataset_path, 'test.parquet')
         self.valid_file: str = os.path.join(self.dataset_path, 'valid.parquet')
 
-        self.model_file: str        = os.path.join(self.train_path, 'cbot_t5.{}.bin')
+        self.model_file: str        = os.path.join(self.train_path, 'cbot_model.{}.bin')
         self.config_file: str       = os.path.join(self.train_path, 'config.json')
-        self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_t5_latest')
-        self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_t5_best')
+        self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_model_latest')
+        self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_model_best')
 
     epochs: int = 8
     batch_size_per_gpu: int = 16

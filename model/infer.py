@@ -9,10 +9,9 @@ from safetensors.torch import load_model
 
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
-from model.model import TextToTextModel
-from utils.functions import get_T5_config
+from model import TextToTextModel
 
-from config import InferConfig, T5ModelConfig
+from config import InferConfig, T5ModelConfig, get_T5_config
 
 class ChatBot:
     def __init__(self, infer_config: InferConfig) -> None:
@@ -20,7 +19,7 @@ class ChatBot:
         '''
         self.infer_config = infer_config
         # 初始化tokenizer
-        tokenizer = PreTrainedTokenizerFast.from_pretrained(infer_config.model_dir)
+        tokenizer = PreTrainedTokenizerFast.from_pretrained(infer_config.tokenizer_dir)
         self.tokenizer = tokenizer
         self.encode = tokenizer.encode_plus
         self.batch_decode = tokenizer.batch_decode
@@ -31,20 +30,20 @@ class ChatBot:
         try:
             model = TextToTextModel(t5_config)
 
-            if os.path.isdir(infer_config.model_dir):
+            if os.path.isdir(infer_config.model_file):
 
                 # from_pretrained
-                model = model.from_pretrained(infer_config.model_dir)
+                model = model.from_pretrained(infer_config.model_file)
 
-            elif infer_config.model_dir.endswith('.safetensors'):
+            elif infer_config.model_file.endswith('.safetensors'):
 
                 # load safetensors
-                load_model(model, infer_config.model_dir) 
+                load_model(model, infer_config.model_file) 
 
             else:
 
                 # load torch checkpoint
-                model.load_state_dict(torch.load(infer_config.model_dir))  
+                model.load_state_dict(torch.load(infer_config.model_file))  
 
             self.model = model
 
@@ -57,7 +56,7 @@ class ChatBot:
                 
             self.model = load_checkpoint_and_dispatch(
                     model=empty_model,
-                    checkpoint=infer_config.model_dir,
+                    checkpoint=infer_config.model_file,
                     device_map='auto',
                     dtype=torch.float16,
                 )
@@ -118,3 +117,11 @@ class ChatBot:
         outputs = [item if len(item) != 0 else note for item in outputs]
 
         return outputs[0] if len(outputs) == 1 else outputs
+
+if __name__ == '__main__':
+
+    infer_config = InferConfig(model_file = './output/model/cbot_model_mini.bin')
+
+    chatbot = ChatBot(infer_config=infer_config)
+
+    print(chatbot.chat('你好吗?'))

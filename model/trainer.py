@@ -444,7 +444,7 @@ class ChatTrainer:
 
         return avg_bleu4_score
 
-    def test(self, best_epoch: int=0) -> None:
+    def test(self, model_file) -> None:
         '''
         '''
         import os 
@@ -490,7 +490,6 @@ class ChatTrainer:
         # T5: All labels set to `-100` are ignored (masked), the loss is only computed for labels in `[0, ..., config.vocab_size]`
         tokenizer = test_dataset.tokenizer
 
-        model_file = train_config.model_file.format(best_epoch)
         if os.path.isdir(model_file):
             # 传入文件夹则 from_pretrained
             model = TextToTextModel.from_pretrained(model_file)
@@ -557,6 +556,7 @@ class ChatTrainer:
 
 
                 bleu4_scores = [get_bleu4_score(reference=target_ids[i], outputs=outputs[i]) for i in range(len(target_ids))]
+
                 bleu4_scores.extend(bleu4_scores)
 
                 # if step >= 10: break
@@ -583,11 +583,11 @@ class ChatTrainer:
 
 if __name__ == '__main__':
 
-    train_config = TrainConfig(dataset_path='./data/result/cbot_dataset_mini', train_path = './data/model/cbot_model_mini', output_model_file = './output/model/cbot_model_mini.bin')
+    train_config = TrainConfig(epochs=20, dataset_path='./data/result/cbot_dataset_mini', train_path = './data/model/cbot_model_mini', output_model_file = './output/model/cbot_model_mini.bin')
     # train_config = TrainConfig()
     model_config = T5ModelConfig()
 
     chat_trainer = ChatTrainer(train_config=train_config, model_config=model_config)
 
     chat_trainer.train()
-    # chat_trainer.test(best_epoch=0)
+    chat_trainer.test('./output/model/cbot_model_mini.bin')
