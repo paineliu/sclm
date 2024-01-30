@@ -117,11 +117,11 @@ def read_and_write_template(read_file: str, write_to_file: str, call_back: objec
     end = time.time()
     return (raw_line_cnt, keep_line_cnt, end -start)
 
-def process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function):
+def process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, call_func_name):
     log_items = []
     save_log_filename = save_filename + ".log"    
 
-    log_items.append('{} -> {}'.format(data_pathname, save_filename))
+    log_items.append('{} {} -> {}'.format(call_func_name, data_pathname, save_filename))
     log.info(log_items[-1], save_to_file=True)
     os.makedirs(os.path.dirname(save_filename), exist_ok=True)
     if recreate:
@@ -129,7 +129,7 @@ def process_data_files(data_pathname, save_filename, recreate, data_filenames, p
             os.remove(save_log_filename)
 
     if os.path.isfile(save_log_filename):
-        log_items.append('{} skip'.format(data_pathname))
+        log_items.append('{} {} skip'.format(call_func_name, data_pathname))
         log.info(log_items[-1], save_to_file=True)
         return False
 
@@ -149,7 +149,7 @@ def process_data_files(data_pathname, save_filename, recreate, data_filenames, p
     f.writelines('\n'.join(log_items))
     f.close()
 
-    log.info('{} success'.format(data_pathname), save_to_file=True)
+    log.info('{} {} success'.format(call_func_name, data_pathname), save_to_file=True)
 
 def process_web_text_zh(data_pathname, save_filename, recreate=False, keep_start: int=5, response_less_word: int=10) -> None:
     '''
@@ -179,7 +179,7 @@ def process_web_text_zh(data_pathname, save_filename, recreate=False, keep_start
         }
         return write_dict
     
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function)
+    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
     
 def process_baike_qa(data_pathname, save_filename, recreate=False, response_less_word: int=15) -> None:
     '''
@@ -226,7 +226,7 @@ def process_baike_qa(data_pathname, save_filename, recreate=False, response_less
 
         return write_dict
 
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function)
+    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
 def process_belle_knowledge(data_pathname, save_filename, recreate=False, response_less_words: int=15, group_cnt: int=10000) -> None:
     '''
@@ -269,7 +269,7 @@ def process_belle_knowledge(data_pathname, save_filename, recreate=False, respon
 
         return write_dict
     
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function)
+    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
 def process_belle_knowledge_finetune(data_pathname, save_filename, recreate=False, max_len: int=320, group_cnt: int=50000) -> None:
     '''
@@ -308,7 +308,7 @@ def process_belle_knowledge_finetune(data_pathname, save_filename, recreate=Fals
 
         return write_dict
 
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function)
+    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
 def csv_gbk_utf8_file(gbk_filename: str, utf8_filename: str) -> None:
     '''
@@ -381,7 +381,7 @@ def process_chinese_medical(gbk_data_pathname, utf8_data_pathname, save_filename
                 utf8_filename = os.path.join(utf8_data_pathname, gbk_filename[len(gbk_data_pathname) + 1:])
                 data_filenames.append(utf8_filename)
                 os.makedirs(os.path.dirname(utf8_filename), exist_ok=True)
-                log_message = '{} -> {}'.format(gbk_filename, utf8_filename)
+                log_message = '{} {} -> {}'.format(sys._getframe().f_code.co_name, gbk_filename, utf8_filename)
                 log.info(log_message, save_to_file=True)
                 if recreate or not os.path.isfile(utf8_filename):
                     start = time.time()
@@ -391,9 +391,9 @@ def process_chinese_medical(gbk_data_pathname, utf8_data_pathname, save_filename
                     log_message = 'time cost = {:.2f}s'.format(duration)
                     log.info(log_message, save_to_file=True)
                 else:
-                    log.info('skip', save_to_file=True)
+                    log.info('{} {} skip'.format(sys._getframe().f_code.co_name, gbk_filename), save_to_file=True)
 
-    process_data_files(gbk_data_pathname, save_filename, recreate, data_filenames, process_function)
+    process_data_files(gbk_data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
 def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_word: int=4, response_less_word: int=10, group_cnt: int=10000) -> None:
     '''
@@ -422,7 +422,7 @@ def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_
     log_items = []
     save_log_filename = save_filename + ".log"    
 
-    log_items.append('{} -> {}'.format(data_pathname, save_filename))
+    log_items.append('{} {} -> {}'.format(sys._getframe().f_code.co_name, data_pathname, save_filename))
     log.info(log_items[-1], save_to_file=True)
     os.makedirs(os.path.dirname(save_filename), exist_ok=True)
     if recreate:
@@ -430,7 +430,7 @@ def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_
             os.remove(save_log_filename)
 
     if os.path.isfile(save_log_filename):
-        log_items.append('{} skip'.format(data_pathname))
+        log_items.append('{} {} skip'.format(sys._getframe().f_code.co_name, data_pathname))
         log.info(log_items[-1], save_to_file=True)
         return False
 
@@ -483,7 +483,7 @@ def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_
     f.writelines('\n'.join(log_items))
     f.close()
 
-    log.info('{} success'.format(data_pathname), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_pathname), save_to_file=True)
 
 def process_zh_wiki(data_filename, save_filename, txt_filename, recreate=False, groups_cnt: int=10000, max_len: int=512, seed: int=23333) -> None:
     '''
@@ -535,16 +535,16 @@ def process_zh_wiki(data_filename, save_filename, txt_filename, recreate=False, 
 
         return line
         
-    np.random.seed(seed)
     log_items = []
     save_log_filename = save_filename + ".log"
-    if not recreate and os.path.isfile(save_log_filename):
-        log.info('{} skip'.format(data_filename), save_to_file=True)
-        return
-    
-    log_items.append('{} -> {}'.format(data_filename, save_filename))
+    log_items.append('{} {} -> {}'.format(sys._getframe().f_code.co_name, data_filename, save_filename))
     log.info(log_items[-1], save_to_file=True)
 
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, data_filename), save_to_file=True)
+        return
+    
+    np.random.seed(seed)
     f_txt = open(txt_filename, 'w', encoding='utf-8')
 
     raw_line_cnt, keep_line_cnt = 0, 0
@@ -622,11 +622,11 @@ def merge_dataset(data_pathname, save_filename, recreate=False, groups_cnt: int=
 
     log_items = []
     save_log_filename = save_filename + ".log"    
-    log_items.append('{} -> {}'.format(data_pathname, save_filename))
+    log_items.append('{} {} -> {}'.format(sys._getframe().f_code.co_name, data_pathname, save_filename))
     log.info(log_items[-1], save_to_file=True)
 
     if not recreate and os.path.isfile(save_log_filename):
-        log.info('{} skip'.format(data_pathname), save_to_file=True)
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, data_pathname), save_to_file=True)
         return
     
     if os.path.isfile(save_filename):
@@ -678,7 +678,7 @@ def merge_dataset(data_pathname, save_filename, recreate=False, groups_cnt: int=
     f.writelines('\n'.join(log_items))
     f.close()
 
-    log.info('{} success'.format(data_pathname), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_pathname), save_to_file=True)
 
 def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed: int=23333, groups_cnt: int=65536) -> None:
     '''
@@ -688,11 +688,11 @@ def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed
 
     log_items = []
     save_log_filename = save_filename + ".log"    
-    log_items.append('{} -> {}'.format(data_filename, save_filename))
+    log_items.append('{} {} -> {}'.format(sys._getframe().f_code.co_name, data_filename, save_filename))
     log.info(log_items[-1], save_to_file=True)
 
     if not recreate and os.path.isfile(save_log_filename):
-        log.info('{} skip'.format(data_filename), save_to_file=True)
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, data_filename), save_to_file=True)
         return
     
     if os.path.isfile(save_filename):
@@ -718,7 +718,7 @@ def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed
     f.writelines('\n'.join(log_items))
     f.close()
 
-    log.info('{} success'.format(data_filename), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_filename), save_to_file=True)
 
 def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, max_len: int=320, seed: int=23333, train_ratio: float=0.91, test_ratio: float=0.0875, valid_ratio: float=0.0025, groups_cnt: int=50000) -> None:
     '''
@@ -728,11 +728,11 @@ def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, m
 
     log_items = []
     save_log_filename = source_parquet_file + "_split.log"    
-    log_items.append('{}'.format(source_parquet_file))
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, source_parquet_file))
     log.info(log_items[-1], save_to_file=True)
 
     if not recreate and os.path.isfile(save_log_filename):
-        log.info('{} skip'.format(source_parquet_file), save_to_file=True)
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, source_parquet_file), save_to_file=True)
         return
         
     start = time.time()
@@ -804,13 +804,24 @@ def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, m
     f.writelines('\n'.join(log_items))
     f.close()
 
-    log.info('{} success'.format(source_parquet_file), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, source_parquet_file), save_to_file=True)
 
-def parquet_to_text(pq_filename, txt_filename, sep='[SEP]', buffer_size: int=50000) -> None:
+def parquet_to_text(pq_filename, txt_filename, recreate=False, sep='[SEP]', buffer_size: int=50000) -> None:
     '''
     将parquet文件转换为txt预料，句子之间用sep隔开
     txt文件用于训练tokenizer，使用huggingface的BPE训练会导致OOM
     '''
+    log_items = []
+    save_log_filename = txt_filename + ".log"    
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, pq_filename))
+    log.info(log_items[-1], save_to_file=True)
+
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+        return
+        
+    start = time.time()
+
     os.makedirs(os.path.dirname(txt_filename), exist_ok=True)
 
     source_pf = ParquetFile(pq_filename)
@@ -832,10 +843,31 @@ def parquet_to_text(pq_filename, txt_filename, sep='[SEP]', buffer_size: int=500
             f_write.writelines(cur_rows)
             cur_rows = []
 
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()
+
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+
 def parquet_to_json(pq_filename, json_filename) -> None:
     '''
     将parquet文件转换为json
     '''
+    log_items = []
+    save_log_filename = json_filename + ".log"    
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, pq_filename))
+    log.info(log_items[-1], save_to_file=True)
+
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+        return
+        
+    start = time.time()
+
     os.makedirs(os.path.dirname(json_filename), exist_ok=True)
 
     source_pf = ParquetFile(pq_filename)
@@ -853,7 +885,20 @@ def parquet_to_json(pq_filename, json_filename) -> None:
     with open(json_filename, 'w', encoding='utf-8') as f:
         ujson.dump(cur_rows, f, indent=4, ensure_ascii=False)
 
-def stat_parquet_data_length(pq_filename, img_filename) -> None:
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()
+
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+
+def draw_sentence_len_image(pq_filename, img_filename) -> None:
+
+    log.info('{} {} -> {}'.format(sys._getframe().f_code.co_name, pq_filename, img_filename), save_to_file=True)
+    start = time.time()
 
     os.makedirs(os.path.dirname(img_filename), exist_ok=True)
 
@@ -924,22 +969,31 @@ def stat_parquet_data_length(pq_filename, img_filename) -> None:
     plt.savefig(img_filename)
     plt.show()
 
-def stat_parquet_data_lines(parquet_file: str=None) -> None:
+    end = time.time()
+    duration = end - start
+    log.info('time cost = {:.2f}s'.format(duration), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+
+def stat_data_line_total(pq_filename: str=None) -> None:
     '''
     统计parquet数据集数据量
     '''
+
+    log.info('{} {}'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+    start = time.time()
+
     data_filenames = []
 
-    if os.path.isdir(parquet_file):
-        for root,dirs,files in os.walk(parquet_file):
+    if os.path.isdir(pq_filename):
+        for root,dirs,files in os.walk(pq_filename):
             for file in files:
                 if file.endswith(".parquet"):
                     data_filename = os.path.join(root, file)
                     data_filenames.append(data_filename)
     else:
-        data_filenames = [parquet_file]
+        data_filenames = [pq_filename]
 
-    result = [['file_name', 'count']]
+    result = [['file_name', 'lines']]
     raw_line_cnt = 0
     for file in data_filenames:
         file_name = file.split('/')[-1]
@@ -966,11 +1020,16 @@ def stat_parquet_data_lines(parquet_file: str=None) -> None:
 
     console.print(table)    
 
+    end = time.time()
+    duration = end - start
+    log.info('time cost = {:.2f}s'.format(duration), save_to_file=True)
+    log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
+
 
 if __name__ == '__main__':
 
     log = Logger('data_process', save2file=True, file_name='./logs/make_data.log')
-    recreate = True
+    recreate = False
 
     # =================================================================
     # data process
@@ -984,8 +1043,8 @@ if __name__ == '__main__':
 
     # =================================================================
     # dataset
-    merge_dataset('./data/parquet', './data/result/cbot_merge.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
-    shuffle_dataset('./data/result/cbot_merge.parquet', './data/result/cbot_dataset.parquet', recreate=recreate, seed=23333)
+    merge_dataset('./data/parquet', './data/result/data_merge.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
+    shuffle_dataset('./data/result/data_merge.parquet', './data/result/cbot_dataset.parquet', recreate=recreate, seed=23333)
     split_datasets('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset', recreate=recreate, max_len=320, groups_cnt=50000)
 
     # =================================================================
@@ -993,6 +1052,6 @@ if __name__ == '__main__':
     parquet_to_text('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.txt')
     parquet_to_json('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.json')
     # stat
-    stat_parquet_data_lines('./data/parquet')
-    # stat_parquet_data_length('./data/result/cbot_dataset.parquet', './data/img/cbot_dataset_sentence_length.png')
+    stat_data_line_total('./data/parquet')
+    draw_sentence_len_image('./data/result/cbot_dataset.parquet', './img/cbot_dataset_sentence_length.png')
 
