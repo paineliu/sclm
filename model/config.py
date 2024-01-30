@@ -92,7 +92,7 @@ class TrainConfig:
         self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_model_latest')
         self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_model_best')
 
-    epochs: int = 8
+    epochs: int = 100
     batch_size_per_gpu: int = 16
     
     learn_rate: float = 0.0001                      # 最大 div_factor * learn_rate
