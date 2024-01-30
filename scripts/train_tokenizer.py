@@ -8,13 +8,31 @@ from tokenizers.normalizers import NFKC
 from multiprocessing import RLock, Pool
 from multiprocessing.managers import BaseManager
 import os 
-from collections import defaultdict
+import time
+import sys
+sys.path.extend(['.','..'])
+from utils.logger import Logger
 
-def train_hf_bpe_tokenizer(corpus_filename, token_filename, max_train_line: int=None) -> None:
+log = Logger('train_tokenizer', save2file=True, file_name= './logs/train_tokenizer.log')
+
+def train_hf_bpe_tokenizer(corpus_filename, token_filename, recreate=False, max_train_line: int=None) -> None:
     '''
     训练tokenizer with huggingface，至少需要32G内存，运行大概需要半个小时。
     '''
     os.makedirs(os.path.dirname(token_filename), exist_ok=True)
+    log_items = []
+    save_log_filename = token_filename + ".log"    
+
+    log_items.append('{} -> {}'.format(corpus_filename, token_filename))
+    log.info(log_items[-1], save_to_file=True)
+    if recreate:
+        if os.path.isfile(save_log_filename):
+            os.remove(save_log_filename)
+
+    if os.path.isfile(save_log_filename):
+        log_items.append('{} skip'.format(corpus_filename))
+        log.info(log_items[-1], save_to_file=True)
+        return False
 
     def get_training_corpus(buffer_size: int=1000, chunk_len: int=2048) -> list:
         '''
@@ -40,11 +58,13 @@ def train_hf_bpe_tokenizer(corpus_filename, token_filename, max_train_line: int=
                     yield buffer
                     buffer = []
 
-                if isinstance(max_train_line, int) and line_cnt > max_train_line: break
+                if isinstance(max_train_line, int) and line_cnt > max_train_line:
+                    break
                 
             # yield last
             if len(buffer) > 0: yield buffer        
 
+    start = time.time()
     model = BPE(unk_token="[UNK]")
 
     tokenizer = Tokenizer(model)
@@ -73,6 +93,17 @@ def train_hf_bpe_tokenizer(corpus_filename, token_filename, max_train_line: int=
 
     tokenizer.save(token_filename)
 
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)        
+
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()
+
+    log.info('{} success'.format(corpus_filename), save_to_file=True)
+
 if __name__ == '__main__':
 
-    train_hf_bpe_tokenizer('./data/raw/zhwiki/zhwiki_cn.txt', './output/hf_bpe_tokenizer.json')
+    train_hf_bpe_tokenizer('./data/text/dataset_shuffle.txt', './output/hf_bpe_tokenizer/tokenizer.json', max_train_line=10000000)
