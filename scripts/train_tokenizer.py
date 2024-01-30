@@ -1,4 +1,3 @@
-from fastparquet import ParquetFile
 import tokenizers
 from tokenizers import Tokenizer, decoders
 from tokenizers.models import BPE

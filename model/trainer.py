@@ -63,9 +63,9 @@ class ChatTrainer:
                 suffix =  'exit_save_{}'.format(str(time.strftime('%Y%m%d%H%M%S', time.localtime())))
 
                 self.accelerator.wait_for_everyone()
-                self.accelerator.save_state(output_dir=self.train_config.train_state_dir)
+                self.accelerator.save_state(output_dir=self.train_config.latest_state_dir)
 
-                self.accelerator.print('model ckeck point has been saved in {}'.format(self.train_config.train_state_dir))
+                self.accelerator.print('model ckeck point has been saved in {}'.format(self.train_config.latest_state_dir))
         
             sys.exit(0)
         else:
@@ -88,6 +88,7 @@ class ChatTrainer:
             if self.accelerator.is_main_process:
                 unwrap_model = self.accelerator.unwrap_model(self.model)
                 model_dict =  self.accelerator.get_state_dict(unwrap_model)
+                os.makedirs(os.path.dirname(model_filename), exist_ok=True)
                 torch.save(model_dict, model_filename)
 
     
@@ -140,7 +141,7 @@ class ChatTrainer:
         accelerator = Accelerator(
             mixed_precision=train_config.mixed_precision,       # 混合精度
             gradient_accumulation_steps=accumulation_steps,     # 梯度累积
-            project_dir=train_config.train_state_dir,
+            project_dir=train_config.latest_state_dir,
         )
 
         # 根据剩余内存大小决定是否完全加载数据集到内存中
@@ -265,7 +266,7 @@ class ChatTrainer:
             )
         
         if is_keep_training:
-            accelerator.load_state(input_dir=train_config.train_state_dir)
+            accelerator.load_state(input_dir=train_config.latest_state_dir)
             accelerator.register_for_checkpointing(lr_scheduler)
         
         self.model = model
@@ -340,8 +341,8 @@ class ChatTrainer:
                 
                 # 每隔save_steps步保存一次模型
                 if (step + 1) % save_steps == 0 or step == steps_per_epoch:
-                    self.save_model(self.train_config.model_file.format('epoch_{}'.format(epoch)))
-                    accelerator.save_state(output_dir=train_config.train_state_dir)
+                    self.save_model(self.train_config.model_file.format(epoch))
+                    accelerator.save_state(output_dir=train_config.latest_state_dir)
                 
                 # ==================================以下记录loss到日志============================================
                 # 每n步更新一次，避免频繁的cpu-gpu数据复制
@@ -387,7 +388,7 @@ class ChatTrainer:
                 # 最多保存最近keep_latest_n_ckp个模型文件
                 # self.delete_early_checkpoint(epoch=epoch, keep_latest_n=train_config.keep_latest_n_ckp)
                 self.save_model(train_config.output_model_file)
-                accelerator.save_state(output_dir=train_config.output_state_dir)
+                accelerator.save_state(output_dir=train_config.best_state_dir)
 
             # 每个epoch打印一下日志
             if accelerator.is_main_process:
@@ -593,7 +594,8 @@ class ChatTrainer:
         self.logger.info(info, std_out=False, save_to_file=True)
 
 if __name__ == '__main__':
-    train_config = TrainConfig(dataset_path='./data/result/dataset_mini')
+
+    train_config = TrainConfig(dataset_path='./data/result/dataset_mini', train_path = './data/model/pertrain_mini', output_model_file = './output/model/cbot_t5_mini_pretrain.bin')
     model_config = T5ModelConfig()
 
     chat_trainer = ChatTrainer(train_config=train_config, model_config=model_config)

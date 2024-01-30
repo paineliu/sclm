@@ -87,6 +87,11 @@ class TrainConfig:
         self.test_file: str = os.path.join(self.dataset_path, 'test.parquet')
         self.validation_file: str = os.path.join(self.dataset_path, 'valid.parquet')
 
+        self.model_file: str        = os.path.join(self.train_path, 'cbot_t5.{}.bin')
+        self.model_config_file: str = os.path.join(self.train_path, 'config.json')
+        self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_t5_latest')
+        self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_t5_best')
+
     epochs: int = 8
     batch_size_per_gpu: int = 16
     
@@ -101,22 +106,25 @@ class TrainConfig:
     warmup_steps: int = 1024                        # 模型参数预热步数，预热样本数=warmup_steps * batch_size * gradient_accumulation_steps
     
     # dataset
-    dataset_path: str = './data/result/data_shuffle'
-    train_file: str = './data/result/data_shuffle/train.parquet'
-    validation_file: str = './data/result/data_shuffle/valid.parquet'
-    test_file: str = './data/result/data_shuffle/test.parquet'
+    dataset_path: str      = './data/result/data_shuffle'
+
+    train_file: str        = './data/result/data_shuffle/train.parquet'
+    validation_file: str   = './data/result/data_shuffle/valid.parquet'
+    test_file: str         = './data/result/data_shuffle/test.parquet'
     
     # token
-    tokenizer_dir: str = './output/tokenizer'
-
-    # 
-    model_file: str =        './data/model/pertrain/chat_bot_t5.{}.bin'
+    tokenizer_dir: str     = './output/tokenizer'
+   
+    # train
+    train_path: str        = './data/model/pertrain'
+    
+    model_file: str        = './data/model/pertrain/cbot_t5.{}.bin'
     model_config_file: str = './data/model/pertrain/config.json'
-    # 训练状态保存，中断后可以从此处继续训练
-    train_state_dir: str =  './data/model/pertrain/train_latest_state'
+    latest_state_dir: str  = './data/model/pertrain/cbot_t5_latest'
+    best_state_dir: str    = './data/model/pertrain/cbot_t5_best'
 
-    output_model_file: str = './output/model/chat_bot_t5_best.bin'
-    output_state_dir: str  = './output/model/pretrain_best_state'
+    # output
+    output_model_file: str = './output/model/cbot_t5_pretrain.bin'
 
     logging_steps: int = 50
     save_steps: int = 10000
