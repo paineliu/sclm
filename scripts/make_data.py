@@ -720,7 +720,7 @@ def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed
 
     log.info('{} success'.format(data_filename), save_to_file=True)
 
-def split_datasets(source_parquet_file: str, recreate=False, max_len: int=320, seed: int=23333, train_ratio: float=0.91, test_ratio: float=0.0875, valid_ratio: float=0.0025, groups_cnt: int=50000) -> None:
+def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, max_len: int=320, seed: int=23333, train_ratio: float=0.91, test_ratio: float=0.0875, valid_ratio: float=0.0025, groups_cnt: int=50000) -> None:
     '''
     将原始数据拆分为训练集、测试集和验证集
     '''
@@ -736,11 +736,13 @@ def split_datasets(source_parquet_file: str, recreate=False, max_len: int=320, s
         return
         
     start = time.time()
-    
+
+    os.makedirs(dataset_pathname, exist_ok=True)
  
-    train_parquet_file = source_parquet_file[:-8] + '_train.parquet'
-    test_parquet_file = source_parquet_file[:-8] + '_test.parquet'
-    valid_parquet_file =  source_parquet_file[:-8] + '_valid.parquet'
+    train_parquet_file = os.path.join(dataset_pathname, 'train.parquet')
+    test_parquet_file = os.path.join(dataset_pathname, 'test.parquet')
+    valid_parquet_file =  os.path.join(dataset_pathname, 'valid.parquet')
+    
     if os.path.isfile(train_parquet_file):
         os.remove(train_parquet_file)
     if os.path.isfile(test_parquet_file):
@@ -984,12 +986,12 @@ if __name__ == '__main__':
     # dataset
     merge_dataset('./data/parquet', './data/result/dataset_all.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
     shuffle_dataset('./data/result/dataset_all.parquet', './data/result/dataset_shuffle.parquet', recreate=recreate, seed=23333)
-    split_datasets('./data/result/dataset_shuffle.parquet', recreate=recreate, max_len=320, groups_cnt=50000)
+    split_datasets('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle', recreate=recreate, max_len=320, groups_cnt=50000)
 
     # =================================================================
     # convert
-    parquet_to_text('./data/result/dataset_shuffle.parquet', './data/text/dataset_shuffle.txt')
-    parquet_to_json('./data/result/dataset_shuffle.parquet', './data/text/dataset_shuffle.json')
+    parquet_to_text('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle.txt')
+    parquet_to_json('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle.json')
     # stat
     stat_parquet_data_lines('./data/parquet')
     # stat_parquet_data_length('./data/result/dataset_shuffle.parquet', './data/img/dataset_sentence_length.png')

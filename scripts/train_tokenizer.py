@@ -15,9 +15,9 @@ from utils.logger import Logger
 
 log = Logger('train_tokenizer', save2file=True, file_name= './logs/train_tokenizer.log')
 
-def train_hf_bpe_tokenizer(corpus_filename, token_filename, recreate=False, max_train_line: int=None) -> None:
+def train_hf_bpe_tokenizer(corpus_filename, token_filename, pretrained_token_pathname, recreate=False, max_train_line: int=None) -> None:
     '''
-    训练tokenizer with huggingface，至少需要32G内存，运行大概需要半个小时。
+    训练tokenizer with huggingface 1000万条数据大约需要100G内存。
     '''
     os.makedirs(os.path.dirname(token_filename), exist_ok=True)
     log_items = []
@@ -92,6 +92,8 @@ def train_hf_bpe_tokenizer(corpus_filename, token_filename, recreate=False, max_
         tokenizer.add_tokens(['\n'])
 
     tokenizer.save(token_filename)
+    
+    trained_tokenizer_to_pretrained_tokenizer_fast(token_filename, pretrained_token_pathname)
 
     end = time.time()
     duration = end - start
@@ -104,6 +106,24 @@ def train_hf_bpe_tokenizer(corpus_filename, token_filename, recreate=False, max_
 
     log.info('{} success'.format(corpus_filename), save_to_file=True)
 
+def trained_tokenizer_to_pretrained_tokenizer_fast(trained_token_filename, pretrained_token_pathname):
+    '''
+    将Tokenizer转换为 PreTrainedTokenizerFast
+    '''
+    from transformers import PreTrainedTokenizerFast
+
+    tokenizer_obj = Tokenizer.from_file(trained_token_filename)
+    tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer_obj)
+    tokenizer.pad_token = '[PAD]'
+    tokenizer.pad_token_id = tokenizer_obj.token_to_id('[PAD]')
+    tokenizer.unk_token = '[UNK]'
+    tokenizer.unk_token_id = tokenizer_obj.token_to_id('[UNK]')
+    tokenizer.eos_token = '[EOS]'
+    tokenizer.eos_token_id = tokenizer_obj.token_to_id('[EOS]')
+
+    tokenizer.save_pretrained(pretrained_token_pathname)
+
+
 if __name__ == '__main__':
 
-    train_hf_bpe_tokenizer('./data/text/dataset_shuffle.txt', './output/hf_bpe_tokenizer/tokenizer.json', max_train_line=10000000)
+    train_hf_bpe_tokenizer('./data/result/dataset_shuffle.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)

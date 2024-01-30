@@ -3,6 +3,7 @@ from torch import Tensor, LongTensor
 from transformers import T5ForConditionalGeneration, T5Config
 from transformers import TextIteratorStreamer
 from transformers.generation.configuration_utils import GenerationConfig
+from config import T5ModelConfig
 
 class TextToTextModel(T5ForConditionalGeneration):
     def __init__(self, config: T5Config) -> None:
@@ -72,3 +73,6 @@ class TextToTextModel(T5ForConditionalGeneration):
             )
 
         return result
+
+if __name__ == '__main__':
+    pass

@@ -1,4 +1,6 @@
+import os
 from dataclasses import dataclass
+from transformers import T5Config
 from os.path import dirname, abspath
 
 # ===================================================================================
@@ -9,10 +11,10 @@ class InferConfig:
     mixed_precision: str = "bf16"                   # 混合精度 ''no','fp16','bf16' or 'fp8'
 
     # 全量DPO模型文件
-    model_dir: str = PROJECT_ROOT + '/model_save/'
+    model_dir: str = './output/model_save/'
 
     # lora PDO 合并后的模型文件
-    # model_file: str = PROJECT_ROOT + '/model_save/chat_small_t5.best.dpo.lora_merged.bin'
+    # model_file: str = './model_save/chat_small_t5.best.dpo.lora_merged.bin'
     
     # this confing for api demo:
     api_key: str = ""
@@ -28,15 +30,15 @@ class InferConfig:
 @dataclass
 class DpoConfig:
     max_seq_len: int = 512 + 8                  # 8 for eos token 
-    sft_model_file: str = PROJECT_ROOT + '/model_save/'
+    sft_model_file: str = './model_save/'
 
-    tokenizer_dir: str = PROJECT_ROOT + '/model_save/tokenizer'
+    tokenizer_dir: str = './model_save/tokenizer'
 
-    dpo_train_file: str = PROJECT_ROOT + '/data/my_dpo_data.json'
-    dpo_eval_file: str = PROJECT_ROOT + '/data/my_dpo_eval.json'
+    dpo_train_file: str = './data/my_dpo_data.json'
+    dpo_eval_file: str = './data/my_dpo_eval.json'
 
-    adapter_file: str = PROJECT_ROOT + '/data/dpo/adapter_model.safetensors'
-    log_dir: str = PROJECT_ROOT + '/logs/'
+    adapter_file: str = './data/dpo/adapter_model.safetensors'
+    log_dir: str = './logs/'
 
     per_device_train_batch_size: int = 4
     num_train_epochs: int = 4
@@ -45,7 +47,7 @@ class DpoConfig:
     logging_first_step: bool = True
     logging_steps: int = 20                      
     save_steps: int = 2000
-    output_dir: str = PROJECT_ROOT + '/model_save/dpo'
+    output_dir: str = '/model_save/dpo'
     warmup_steps: int = 1000
     fp16: bool = True
     seed: int = 23333
@@ -58,10 +60,10 @@ class DpoConfig:
 class SFTconfig:
     max_seq_len: int = 384 + 8                # 8 for eos token 
 
-    finetune_from_ckp_file = PROJECT_ROOT + '/model_save/'
+    finetune_from_ckp_file = './model_save/'
 
-    tokenizer_dir: str = PROJECT_ROOT + '/model_save/tokenizer'
-    sft_train_file: str = PROJECT_ROOT + '/data/sft_train.json'
+    tokenizer_dir: str = './model_save/tokenizer'
+    sft_train_file: str = './data/sft_train.json'
 
     batch_size: int = 12
     num_train_epochs: int = 4
@@ -70,7 +72,7 @@ class SFTconfig:
     learning_rate: float = 1e-5
     logging_first_step: bool = True
     logging_steps: int = 100                      
-    output_dir: str = PROJECT_ROOT + '/model_save/sft'
+    output_dir: str = './model_save/sft'
     warmup_steps: int = 100
     fp16: bool = True
     seed: int = 23333
@@ -80,8 +82,11 @@ class SFTconfig:
 # 以下为训练的配置
 @dataclass
 class TrainConfig:
-    def __init__(self):
-        print(TrainConfig)
+    def __post_init__(self):
+        self.train_file: str = os.path.join(self.dataset_path, 'train.parquet')
+        self.test_file: str = os.path.join(self.dataset_path, 'test.parquet')
+        self.validation_file: str = os.path.join(self.dataset_path, 'valid.parquet')
+
     epochs: int = 8
     batch_size_per_gpu: int = 16
     
@@ -94,27 +99,30 @@ class TrainConfig:
     gradient_accumulation_steps: int = 8           # 累积梯度更新步数
 
     warmup_steps: int = 1024                        # 模型参数预热步数，预热样本数=warmup_steps * batch_size * gradient_accumulation_steps
+    
+    # dataset
+    dataset_path: str = './data/result/data_shuffle'
+    train_file: str = './data/result/data_shuffle/train.parquet'
+    validation_file: str = './data/result/data_shuffle/valid.parquet'
+    test_file: str = './data/result/data_shuffle/test.parquet'
+    
+    # token
+    tokenizer_dir: str = './output/tokenizer'
 
-    tokenizer_dir: str = PROJECT_ROOT + '/model_save/tokenizer'
-    model_file: str = PROJECT_ROOT + '/model_save/chat_small_t5.{}.bin'
-    model_config_file: str = PROJECT_ROOT + '/model_save/model_config.json'
-    train_file: str = PROJECT_ROOT + '/data/my_train_dataset.parquet'
-    validation_file: str = PROJECT_ROOT + '/data/my_valid_dataset.parquet'
-    test_file: str = PROJECT_ROOT + '/data/my_test_dataset.parquet'
-
-    # 从哪个模型开始微调，仅当traing 函数 is_finetune = True时生效
-    # 微调记得冻结某些层或者调低学习率
-    finetune_from_ckp_file = PROJECT_ROOT + '/model_save/chat_small_t5.best.bin'
-
+    # 
+    model_file: str =        './data/model/pertrain/chat_bot_t5.{}.bin'
+    model_config_file: str = './data/model/pertrain/config.json'
     # 训练状态保存，中断后可以从此处继续训练
-    train_state_dir: str = PROJECT_ROOT + '/model_save/train_latest_state'
-    output_dir: str = PROJECT_ROOT + '/model_save/pretrain'
+    train_state_dir: str =  './data/model/pertrain/train_latest_state'
+
+    output_model_file: str = './output/model/chat_bot_t5_best.bin'
+    output_state_dir: str  = './output/model/pretrain_best_state'
 
     logging_steps: int = 50
     save_steps: int = 10000
     
-    # dataset_cache_dir: str = PROJECT_ROOT + '/data/.cache'
-    # trainer_log_file: str = PROJECT_ROOT + '/logs/trainer.log'
+    # dataset_cache_dir: str = './data/.cache'
+    # trainer_log_file: str = './logs/trainer.log'
 
     keep_latest_n_ckp: int = 8                  # 训练过程中，最多保留多少个分数最好的模型文件
 
@@ -135,3 +143,27 @@ class T5ModelConfig:
 
     num_decoder_layers: int = 10            # Transformer decoder 隐藏层层数， 默认：6, 大：10
     num_layers: int = 10                    # Transformer encoder 隐藏层层数，默认：6, 大：10
+
+
+def get_T5_config(config: T5ModelConfig, vocab_size: int, decoder_start_token_id: int=0, eos_token_id: int=1) -> T5Config:
+    '''
+    用户配置转换为T5Config
+    '''
+    t5_config = T5Config()
+    # t5_config.model_type = 'TextToTextModel'
+    # 初始化
+    t5_config.d_ff = config.d_ff
+    t5_config.d_kv = config.d_kv
+    t5_config.d_model = config.d_model
+    t5_config.num_decoder_layers = config.num_decoder_layers
+    t5_config.num_heads = config.num_heads
+    t5_config.num_layers = config.num_layers
+    t5_config.vocab_size = vocab_size
+    t5_config.decoder_start_token_id = decoder_start_token_id
+    t5_config.eos_token_id = eos_token_id
+
+    return t5_config
+
+if __name__ == '__main__':
+    train_config = TrainConfig(epochs=9, dataset_path="./")
+    print(train_config)

@@ -12,23 +12,22 @@ import torch
 from rich.progress import Progress, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
 from transformers import PreTrainedTokenizerFast
 from torch_optimizer import Adafactor
-
-# import accelerate
 from accelerate import Accelerator
 from accelerate.utils import set_seed
+import sys
+sys.path.extend(['.','..'])
 
 # import 自定义类和函数
-from model.chat_model import TextToTextModel
+from model import TextToTextModel
 from utils.logger import Logger
-from model.dataset import MyDataset
-from config import TrainConfig, T5ModelConfig
+from dataset import ChatDataset
+from config import TrainConfig, T5ModelConfig, get_T5_config
 from utils.functions import (
     get_bleu4_score, 
     save_model_config, 
     get_free_space_of_disk, 
     my_average,
     get_path_of_suffix_files,
-    get_T5_config,
 )
 
 class ChatTrainer:
@@ -73,7 +72,7 @@ class ChatTrainer:
             print('process not in trainingg, exit.')
             sys.exit(0)
 
-    def save_model(self, suffix: Union[str, int]) -> None:
+    def save_model(self, model_filename: Union[str, int]) -> None:
         '''保存模型到文件
         注意：save_model不能放到is_main_process里面
         e.g:
@@ -89,7 +88,7 @@ class ChatTrainer:
             if self.accelerator.is_main_process:
                 unwrap_model = self.accelerator.unwrap_model(self.model)
                 model_dict =  self.accelerator.get_state_dict(unwrap_model)
-                torch.save(model_dict, self.train_config.model_file.format(suffix))
+                torch.save(model_dict, model_filename)
 
     
     def delete_early_checkpoint(self, epoch: int, keep_latest_n: int=3,) -> None:
@@ -168,13 +167,13 @@ class ChatTrainer:
         #     else:
         #         num_workers = int(cpu_cnt // 2)
 
-        train_dataset = MyDataset(
+        train_dataset = ChatDataset(
             parquet_file=train_config.train_file,
             tokenizer_dir=train_config.tokenizer_dir,
             keep_in_memory=keep_in_memory,
             max_seq_len=train_config.max_seq_len,
         )
-        valid_dataset = MyDataset(
+        valid_dataset = ChatDataset(
             parquet_file=train_config.validation_file,
             tokenizer_dir=train_config.tokenizer_dir,
             keep_in_memory=keep_in_memory,
@@ -215,7 +214,7 @@ class ChatTrainer:
 
         # 微调加载的模型并冻结embedding和encoder
         if is_finetune:
-            model.load_state_dict(torch.load(train_config.finetune_from_ckp_file))
+            model.load_state_dict(torch.load(train_config.output_model_file))
             # print(model)
             
             layers_to_freeze = [model.shared, model.encoder]
@@ -341,7 +340,7 @@ class ChatTrainer:
                 
                 # 每隔save_steps步保存一次模型
                 if (step + 1) % save_steps == 0 or step == steps_per_epoch:
-                    self.save_model('epoch_{}_latest'.format(epoch))
+                    self.save_model(self.train_config.model_file.format('epoch_{}'.format(epoch)))
                     accelerator.save_state(output_dir=train_config.train_state_dir)
                 
                 # ==================================以下记录loss到日志============================================
@@ -387,8 +386,8 @@ class ChatTrainer:
                 best_epoch = epoch
                 # 最多保存最近keep_latest_n_ckp个模型文件
                 # self.delete_early_checkpoint(epoch=epoch, keep_latest_n=train_config.keep_latest_n_ckp)
-                self.save_model('best')
-                accelerator.save_state(output_dir=train_config.train_state_dir)
+                self.save_model(train_config.output_model_file)
+                accelerator.save_state(output_dir=train_config.output_state_dir)
 
             # 每个epoch打印一下日志
             if accelerator.is_main_process:
@@ -467,7 +466,7 @@ class ChatTrainer:
         # args for dataloader
         num_workers = 0 if self.is_win_platform else 4
 
-        test_dataset = MyDataset(
+        test_dataset = ChatDataset(
             parquet_file=train_config.train_file,
             tokenizer_dir=train_config.tokenizer_dir,
             keep_in_memory=False if self.is_win_platform else True,
@@ -594,9 +593,7 @@ class ChatTrainer:
         self.logger.info(info, std_out=False, save_to_file=True)
 
 if __name__ == '__main__':
-    
-    # trainer = ChatTrainer()
-    train_config = TrainConfig()
+    train_config = TrainConfig(dataset_path='./data/result/dataset_mini')
     model_config = T5ModelConfig()
 
     chat_trainer = ChatTrainer(train_config=train_config, model_config=model_config)

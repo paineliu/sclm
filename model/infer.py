@@ -10,7 +10,7 @@ from safetensors.torch import load_model
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 # import 自定义类和函数
-from model.chat_model import TextToTextModel
+from model.model import TextToTextModel
 from utils.functions import get_T5_config
 
 from config import InferConfig, T5ModelConfig

@@ -7,3 +7,13 @@ pyarrow
 opencc_python_reimplemented
 colorlog
 tokenizers
+torch
+torchvision
+torchaudio
+datasets
+transformers
+psutil
+torch_optimizer
+accelerate
+datasketch
+nltk
