@@ -17,7 +17,6 @@ from accelerate.utils import set_seed
 import sys
 sys.path.extend(['.','..'])
 
-# import 自定义类和函数
 from model import TextToTextModel
 from utils.logger import Logger
 from dataset import ChatDataset
@@ -31,13 +30,12 @@ from utils.functions import (
 )
 
 class ChatTrainer:
-    def __init__(self, train_config: TrainConfig, model_config: T5ModelConfig, ) -> None:
+    def __init__(self, train_config: TrainConfig, model_config: T5ModelConfig) -> None:
         
         self.train_config = train_config
         self.model_config = model_config
 
-        # file_name=None会自动生成以当前日期命名的log文件名
-        self.logger = Logger('chat_trainer', std_out=True, save2file=True, file_name=None)
+        self.logger = Logger('chat_trainer', std_out=True, save2file=True, file_name=self.train_config.trainer_log_file)
 
         self.model = None
         self.accelerator = None
@@ -73,12 +71,8 @@ class ChatTrainer:
             sys.exit(0)
 
     def save_model(self, model_filename: Union[str, int]) -> None:
-        '''保存模型到文件
-        注意：save_model不能放到is_main_process里面
-        e.g:
-        >>> self.save_model(epoch) # 在这里使用
-        >>> if accelerator.is_main_process:
-        >>>     do_somthing()
+        '''
+        保存模型到文件, save_model不能放到is_main_process里面
         '''
         if self.model and self.accelerator:
 
@@ -175,7 +169,7 @@ class ChatTrainer:
             max_seq_len=train_config.max_seq_len,
         )
         valid_dataset = ChatDataset(
-            parquet_file=train_config.validation_file,
+            parquet_file=train_config.valid_file,
             tokenizer_dir=train_config.tokenizer_dir,
             keep_in_memory=keep_in_memory,
             max_seq_len=train_config.max_seq_len,
@@ -225,7 +219,7 @@ class ChatTrainer:
                     param.requires_grad = False
 
         # 保存模型配置，方便修改配置后恢复
-        save_model_config(t5_config.to_diff_dict(), train_config.model_config_file)
+        save_model_config(t5_config.to_diff_dict(), train_config.config_file)
         
         # T5训练，论文推荐使用Adafactor
         optimizer = Adafactor(params=model.parameters(), lr=train_config.learn_rate)
@@ -247,7 +241,6 @@ class ChatTrainer:
             log.info('train dataset size: {}, steps per epoch:{}; validation dataset size: {}, steps per validation: {}; datalodater num_workers: {}.'\
                     .format(len(train_dataset), steps_per_epoch, len(valid_dataset), eval_steps, num_workers), save_to_file=True)
 
-        
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 optimizer=optimizer, 
                 max_lr=train_config.div_factor * train_config.learn_rate, 
@@ -296,8 +289,6 @@ class ChatTrainer:
             self.eval_progress = eval_progress
 
             progress.start()
-
-        # end if
 
         for epoch in range(train_config.epochs):
             
@@ -385,8 +376,6 @@ class ChatTrainer:
 
                 best_bleu4 = cur_bleu4_score
                 best_epoch = epoch
-                # 最多保存最近keep_latest_n_ckp个模型文件
-                # self.delete_early_checkpoint(epoch=epoch, keep_latest_n=train_config.keep_latest_n_ckp)
                 self.save_model(train_config.output_model_file)
                 accelerator.save_state(output_dir=train_config.best_state_dir)
 
@@ -396,7 +385,6 @@ class ChatTrainer:
                 progress.advance(epoch_progress, advance=1)
                 info_txt = 'epoch log: epoch:{}, avg_loss:{}, cur_bleu4:{}, best_bleu4:{}, best_epoch:{}'.\
                             format(epoch, my_average(epoch_loss_list), cur_bleu4_score, best_bleu4, best_epoch)
-                # log.info(info_txt, std_out=True, save_to_file=True)
                 self.print_and_log(info_txt, accelerator)
 
 
@@ -595,7 +583,8 @@ class ChatTrainer:
 
 if __name__ == '__main__':
 
-    train_config = TrainConfig(dataset_path='./data/result/dataset_mini', train_path = './data/model/pertrain_mini', output_model_file = './output/model/cbot_t5_mini_pretrain.bin')
+    # train_config = TrainConfig(dataset_path='./data/result/cbot_dataset_mini', train_path = './data/model/cbot_model_mini', output_model_file = './output/model/cbot_model_mini.bin')
+    train_config = TrainConfig()
     model_config = T5ModelConfig()
 
     chat_trainer = ChatTrainer(train_config=train_config, model_config=model_config)

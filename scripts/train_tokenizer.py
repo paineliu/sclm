@@ -33,7 +33,7 @@ def train_hf_bpe_tokenizer(corpus_filename, token_filename, pretrained_token_pat
         log.info(log_items[-1], save_to_file=True)
         return False
 
-    def get_training_corpus(buffer_size: int=1000, chunk_len: int=2048) -> list:
+    def get_training_corpus(buffer_size: int=1000, chunk_len: int=2048) -> list: # type: ignore
         '''
         一个文本块大小2048
         '''
@@ -125,4 +125,4 @@ def trained_tokenizer_to_pretrained_tokenizer_fast(trained_token_filename, pretr
 
 if __name__ == '__main__':
 
-    train_hf_bpe_tokenizer('./data/result/dataset_shuffle.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)
+    train_hf_bpe_tokenizer('./data/result/cbot_dataset.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)

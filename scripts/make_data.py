@@ -984,15 +984,15 @@ if __name__ == '__main__':
 
     # =================================================================
     # dataset
-    merge_dataset('./data/parquet', './data/result/dataset_all.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
-    shuffle_dataset('./data/result/dataset_all.parquet', './data/result/dataset_shuffle.parquet', recreate=recreate, seed=23333)
-    split_datasets('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle', recreate=recreate, max_len=320, groups_cnt=50000)
+    merge_dataset('./data/parquet', './data/result/cbot_merge.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
+    shuffle_dataset('./data/result/cbot_merge.parquet', './data/result/cbot_dataset.parquet', recreate=recreate, seed=23333)
+    split_datasets('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset', recreate=recreate, max_len=320, groups_cnt=50000)
 
     # =================================================================
     # convert
-    parquet_to_text('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle.txt')
-    parquet_to_json('./data/result/dataset_shuffle.parquet', './data/result/dataset_shuffle.json')
+    parquet_to_text('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.txt')
+    parquet_to_json('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.json')
     # stat
     stat_parquet_data_lines('./data/parquet')
-    # stat_parquet_data_length('./data/result/dataset_shuffle.parquet', './data/img/dataset_sentence_length.png')
+    # stat_parquet_data_length('./data/result/cbot_dataset.parquet', './data/img/cbot_dataset_sentence_length.png')
 

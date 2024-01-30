@@ -53,8 +53,6 @@ class DpoConfig:
     seed: int = 23333
     beta: float = 0.1
 
-
-
 # 以下为sft配置
 @dataclass
 class SFTconfig:
@@ -84,11 +82,11 @@ class SFTconfig:
 class TrainConfig:
     def __post_init__(self):
         self.train_file: str = os.path.join(self.dataset_path, 'train.parquet')
-        self.test_file: str = os.path.join(self.dataset_path, 'test.parquet')
-        self.validation_file: str = os.path.join(self.dataset_path, 'valid.parquet')
+        self.test_file: str  = os.path.join(self.dataset_path, 'test.parquet')
+        self.valid_file: str = os.path.join(self.dataset_path, 'valid.parquet')
 
         self.model_file: str        = os.path.join(self.train_path, 'cbot_t5.{}.bin')
-        self.model_config_file: str = os.path.join(self.train_path, 'config.json')
+        self.config_file: str       = os.path.join(self.train_path, 'config.json')
         self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_t5_latest')
         self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_t5_best')
 
@@ -106,31 +104,30 @@ class TrainConfig:
     warmup_steps: int = 1024                        # 模型参数预热步数，预热样本数=warmup_steps * batch_size * gradient_accumulation_steps
     
     # dataset
-    dataset_path: str      = './data/result/data_shuffle'
+    dataset_path: str      = './data/result/cbot_dataset'
 
-    train_file: str        = './data/result/data_shuffle/train.parquet'
-    validation_file: str   = './data/result/data_shuffle/valid.parquet'
-    test_file: str         = './data/result/data_shuffle/test.parquet'
+    train_file: str        = './data/result/cbot_dataset/train.parquet'
+    valid_file: str   = './data/result/cbot_dataset/valid.parquet'
+    test_file: str         = './data/result/cbot_dataset/test.parquet'
     
     # token
     tokenizer_dir: str     = './output/tokenizer'
    
     # train
-    train_path: str        = './data/model/pertrain'
+    train_path: str        = './data/model/cbot_model'
     
-    model_file: str        = './data/model/pertrain/cbot_t5.{}.bin'
-    model_config_file: str = './data/model/pertrain/config.json'
-    latest_state_dir: str  = './data/model/pertrain/cbot_t5_latest'
-    best_state_dir: str    = './data/model/pertrain/cbot_t5_best'
+    model_file: str        = './data/model/cbot_model/cbot_model.{}.bin'
+    config_file: str       = './data/model/cbot_model/config.json'
+    latest_state_dir: str  = './data/model/cbot_model/cbot_model_latest'
+    best_state_dir: str    = './data/model/cbot_model/cbot_model_best'
 
     # output
-    output_model_file: str = './output/model/cbot_t5_pretrain.bin'
+    output_model_file: str = './output/model/cbot_model.bin'
 
     logging_steps: int = 50
     save_steps: int = 10000
     
-    # dataset_cache_dir: str = './data/.cache'
-    # trainer_log_file: str = './logs/trainer.log'
+    trainer_log_file: str = './logs/trainer.log'
 
     keep_latest_n_ckp: int = 8                  # 训练过程中，最多保留多少个分数最好的模型文件
 
@@ -158,8 +155,7 @@ def get_T5_config(config: T5ModelConfig, vocab_size: int, decoder_start_token_id
     用户配置转换为T5Config
     '''
     t5_config = T5Config()
-    # t5_config.model_type = 'TextToTextModel'
-    # 初始化
+ 
     t5_config.d_ff = config.d_ff
     t5_config.d_kv = config.d_kv
     t5_config.d_model = config.d_model
