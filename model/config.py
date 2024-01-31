@@ -60,10 +60,10 @@ class DpoConfig:
 class SFTconfig:
     max_seq_len: int = 384 + 8                # 8 for eos token 
 
-    finetune_from_ckp_file = './model_save/'
-
-    tokenizer_dir: str = './model_save/tokenizer'
+    finetune_from_ckp_file = './output/model/cbot_model.bin'
+    tokenizer_dir: str  = './output/tokenizer'
     sft_train_file: str = './data/sft_train.json'
+    output_dir: str     = './output/model/cbot_model_sft'
 
     batch_size: int = 12
     num_train_epochs: int = 4
@@ -72,7 +72,6 @@ class SFTconfig:
     learning_rate: float = 1e-5
     logging_first_step: bool = True
     logging_steps: int = 100                      
-    output_dir: str = './model_save/sft'
     warmup_steps: int = 100
     fp16: bool = True
     seed: int = 23333
