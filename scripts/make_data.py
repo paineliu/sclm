@@ -271,7 +271,7 @@ def process_belle_knowledge(data_pathname, save_filename, recreate=False, respon
     
     process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
-def process_belle_knowledge_finetune(data_pathname, save_filename, recreate=False, max_len: int=320, group_cnt: int=50000) -> None:
+def process_belle_knowledge_finetune_sft(data_pathname, save_filename, recreate=False, max_len: int=320, group_cnt: int=50000) -> None:
     '''
     处理belle开源的知识增强数据集
     '''
@@ -1039,7 +1039,7 @@ if __name__ == '__main__':
     process_zhihu_kol('./data/raw/zhihu_kol','./data/parquet/zhihu_kol.parquet', recreate, prompt_less_word=4, response_less_word=10)
     process_belle_knowledge('./data/raw/belle_knowledge', './data/parquet/belle_knowledge.parquet', recreate=recreate, response_less_words=5)
     process_zh_wiki('./data/raw/zhwiki/wiki.txt', './data/parquet/zhwiki_cn.parquet', './data/raw/zhwiki/zhwiki_cn.txt', recreate=recreate, groups_cnt=10000, max_len=512)
-    process_belle_knowledge_finetune('./data/raw/belle_knowledge', './data/result/belle_knowledge_finetune.parquet', recreate=recreate, max_len=320, group_cnt=50000)
+    process_belle_knowledge_finetune_sft('./data/raw/belle_knowledge', './data/result/cbot_dataset_sft.parquet', recreate=recreate, max_len=320, group_cnt=50000)
 
     # =================================================================
     # dataset
@@ -1051,6 +1051,7 @@ if __name__ == '__main__':
     # convert
     parquet_to_text('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.txt')
     parquet_to_json('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.json')
+    parquet_to_json('./data/result/cbot_dataset_sft.parquet', './data/result/cbot_dataset_sft.json')
     # stat
     stat_data_line_total('./data/parquet')
     draw_sentence_len_image('./data/result/cbot_dataset.parquet', './img/cbot_dataset_sentence_length.png')
