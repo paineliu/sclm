@@ -236,6 +236,7 @@ def process_belle_knowledge(data_pathname, save_filename, recreate=False, respon
     data_filenames = [
         os.path.join(data_pathname, 'Belle_open_source_1M.json'),
         os.path.join(data_pathname, 'train_2M_CN.json'),
+        os.path.join(data_pathname, 'train_3.5M_CN.json'),
     ]
 
     def process_function(line: str) -> dict:
