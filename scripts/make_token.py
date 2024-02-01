@@ -1,3 +1,6 @@
+import sys
+sys.path.extend(['.','..'])
+
 import tokenizers
 from tokenizers import Tokenizer, decoders
 from tokenizers.models import BPE
@@ -8,11 +11,8 @@ from multiprocessing import RLock, Pool
 from multiprocessing.managers import BaseManager
 import os 
 import time
-import sys
-sys.path.extend(['.','..'])
-from utils.logger import Logger
 
-log = Logger('train_tokenizer', save2file=True, file_name= './logs/train_tokenizer.log')
+from chatbot import Logger
 
 def train_hf_bpe_tokenizer(corpus_filename, token_filename, pretrained_token_pathname, recreate=False, max_train_line: int=None) -> None:
     '''
@@ -122,7 +122,11 @@ def trained_tokenizer_to_pretrained_tokenizer_fast(trained_token_filename, pretr
 
     tokenizer.save_pretrained(pretrained_token_pathname)
 
+def make_token():
+    global log
+    log = Logger('make_token', save2file=True, file_name= './logs/make_token.log')
+    train_hf_bpe_tokenizer('./data/result/cbot_dataset.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)
 
 if __name__ == '__main__':
 
-    train_hf_bpe_tokenizer('./data/result/cbot_dataset.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)
+    make_token()

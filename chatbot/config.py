@@ -20,7 +20,7 @@ class InferConfig:
     
     # this confing for api demo:
     api_key: str = ""
-    host: str = '127.0.0.1'
+    host: str = '0.0.0.0'
     port: int = 8812
     reload: bool = True
     workers: int = 1

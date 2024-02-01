@@ -5,8 +5,6 @@ import ctypes
 import os
 import platform
 import re
-
-# from nltk import ngrams
 from datasketch import MinHash, MinHashLSH
 from collections import defaultdict
 

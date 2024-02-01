@@ -1,3 +1,6 @@
+import sys
+sys.path.extend(['.','..'])
+
 import ujson
 import re
 import os
@@ -14,10 +17,8 @@ from rich.console import Console
 from fastparquet import ParquetFile, write
 import pyarrow.parquet as pq
 from opencc import OpenCC
-import sys
-sys.path.extend(['.','..'])
 
-from utils.logger import Logger
+from chatbot import Logger
 
 punctuation = set("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~.,;《》？！“”‘’@#￥%…&×（）——+【】{};；●，。&～、|\s:：\n")
 en_punctuation = ",().!;:"
@@ -1026,12 +1027,11 @@ def stat_data_line_total(pq_filename: str=None) -> None:
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
 
 
-if __name__ == '__main__':
-
-    log = Logger('data_process', save2file=True, file_name='./logs/make_data.log')
+def make_data_train():
+    global log
+    log = Logger('make_data_train', save2file=True, file_name='./logs/make_data_train.log')
     recreate = False
 
-    # =================================================================
     # data process
     process_chinese_medical('./data/raw/chinese_medical', './data/raw/chinese_medical_utf8', './data/parquet/chinese_medical_uft8.parquet', recreate=recreate, response_less_word=15)
     process_web_text_zh('./data/raw/web_text_zh', './data/parquet/web_text_zh.parquet', recreate=recreate, keep_start=5, response_less_word=15)
@@ -1039,20 +1039,21 @@ if __name__ == '__main__':
     process_zhihu_kol('./data/raw/zhihu_kol','./data/parquet/zhihu_kol.parquet', recreate, prompt_less_word=4, response_less_word=10)
     process_belle_knowledge('./data/raw/belle_knowledge', './data/parquet/belle_knowledge.parquet', recreate=recreate, response_less_words=5)
     process_zh_wiki('./data/raw/zhwiki/wiki.txt', './data/parquet/zhwiki_cn.parquet', './data/raw/zhwiki/zhwiki_cn.txt', recreate=recreate, groups_cnt=10000, max_len=512)
-    process_belle_knowledge_finetune_sft('./data/raw/belle_knowledge', './data/result/cbot_dataset_sft.parquet', recreate=recreate, max_len=320, group_cnt=50000)
 
-    # =================================================================
     # dataset
     merge_dataset('./data/parquet', './data/result/data_merge.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
     shuffle_dataset('./data/result/data_merge.parquet', './data/result/cbot_dataset.parquet', recreate=recreate, seed=23333)
     split_datasets('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset', recreate=recreate, max_len=320, groups_cnt=50000)
 
-    # =================================================================
     # convert
     parquet_to_text('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.txt')
     parquet_to_json('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.json')
-    parquet_to_json('./data/result/cbot_dataset_sft.parquet', './data/result/cbot_dataset_sft.json')
+
     # stat
     stat_data_line_total('./data/parquet')
     draw_sentence_len_image('./data/result/cbot_dataset.parquet', './img/cbot_dataset_sentence_length.png')
 
+
+if __name__ == '__main__':
+
+    make_data_train()

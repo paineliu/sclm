@@ -1,10 +1,12 @@
+import sys
+sys.path.extend(['.','..'])
+
 import signal
 import sys
 import os
 import time
 from typing import Union
 import platform 
-
 from psutil import virtual_memory, cpu_count
 import numpy as np
 from torch.utils.data import DataLoader
@@ -14,14 +16,12 @@ from transformers import PreTrainedTokenizerFast
 from torch_optimizer import Adafactor
 from accelerate import Accelerator
 from accelerate.utils import set_seed
-import sys
-sys.path.extend(['.','..'])
 
-from model import TextToTextModel
-from utils.logger import Logger
-from dataset import ChatDataset
-from config import TrainConfig, T5ModelConfig, get_T5_config
-from utils.functions import (
+from chatbot.textmodel import TextToTextModel
+from chatbot.logger import Logger
+from chatbot.dataset import ChatDataset
+from chatbot.config import TrainConfig, T5ModelConfig, get_T5_config
+from chatbot.functions import (
     get_bleu4_score, 
     save_model_config, 
     get_free_space_of_disk, 
@@ -258,7 +258,7 @@ class ChatTrainer:
                 valid_dataloader,
             )
         
-        if is_keep_training:
+        if is_keep_training and os.path.isdir(train_config.latest_state_dir):
             accelerator.load_state(input_dir=train_config.latest_state_dir)
             accelerator.register_for_checkpointing(lr_scheduler)
         
@@ -333,7 +333,7 @@ class ChatTrainer:
                 # 每隔save_steps步保存一次模型
                 if (step + 1) % save_steps == 0 or step == steps_per_epoch:
                     self.save_model(self.train_config.model_file.format(epoch))
-                    accelerator.save_state(output_dir=train_config.latest_state_dir)
+                    accelerator.save_state(output_dir=train_config.latest_state_dir, safe_serialization=False)
                 
                 # ==================================以下记录loss到日志============================================
                 # 每n步更新一次，避免频繁的cpu-gpu数据复制

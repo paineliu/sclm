@@ -5,13 +5,10 @@ from transformers import PreTrainedTokenizerFast
 from fastparquet import ParquetFile
 from torch.utils.data import DataLoader
 from datasets import load_dataset
-import datasets
 import pyarrow.parquet as pq
 from numpy import array, int64
 from numpy.random import shuffle
 
-import sys 
-sys.path.extend(['.', '..'])
 
 class ChatDataset(Dataset):
 

@@ -93,7 +93,6 @@ class Logger(object):
             self.file_logger.info(message)
 
 if __name__ == "__main__":
-    log = Logger('test', std_out=True, save2file=True, file_name='../logs/test.log')
-    # log = Logger('test', save2file=True)
+    log = Logger('test', std_out=True, save2file=True, file_name='./logs/test.log')
     log.info('test info')
     log.info('test file log', save_to_file=True)

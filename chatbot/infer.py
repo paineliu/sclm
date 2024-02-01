@@ -1,6 +1,8 @@
+import sys
+sys.path.extend(['.', '..'])
+
 import os
 from threading import Thread
-import platform
 from typing import Union
 import torch
 
@@ -9,9 +11,8 @@ from safetensors.torch import load_model
 
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
-from model import TextToTextModel
-
-from config import InferConfig, T5ModelConfig, get_T5_config
+from chatbot.textmodel import TextToTextModel
+from chatbot.config import InferConfig, T5ModelConfig, get_T5_config
 
 class ChatBot:
     def __init__(self, infer_config: InferConfig) -> None:
@@ -43,7 +44,10 @@ class ChatBot:
             else:
 
                 # load torch checkpoint
-                model.load_state_dict(torch.load(infer_config.model_file))  
+                if torch.cuda.is_available():
+                    model.load_state_dict(torch.load(infer_config.model_file))  
+                else:
+                    model.load_state_dict(torch.load(infer_config.model_file, map_location=torch.device('cpu')))  
 
             self.model = model
 
@@ -63,7 +67,10 @@ class ChatBot:
        
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model.to(self.device)
+        if torch.cuda.is_available():
+            self.model.to(self.device)
+        else:
+            self.model.float().to(self.device)
 
         self.streamer = TextIteratorStreamer(tokenizer=tokenizer, clean_up_tokenization_spaces=True, skip_special_tokens=True)
 
@@ -111,6 +118,7 @@ class ChatBot:
                             search_type='greedy',
                         )
 
+        # print(self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=False))
         outputs = self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=True)
 
         note = "我是一个参数很少的AI模型🥺，知识库较少，无法直接回答您的问题，换个问题试试吧👋"
@@ -120,8 +128,9 @@ class ChatBot:
 
 if __name__ == '__main__':
 
-    infer_config = InferConfig(model_file = './output/model/cbot_model_mini.bin')
+    infer_config = InferConfig(model_file = './output/model/cbot_model.bin')
 
     chatbot = ChatBot(infer_config=infer_config)
 
-    print(chatbot.chat('你好吗?'))
+    print(chatbot.chat('2+3等于5吗?'))
+    print(chatbot.chat('2+3等于几?'))
