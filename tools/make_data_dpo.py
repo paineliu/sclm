@@ -186,7 +186,7 @@ def merge_rlhf_data(data_files, save_file, log, recreate=False, max_len: int=512
     f.writelines('\n'.join(log_items))
     f.close()
 
-def split_train_eval_dataset(data_file, save_path, log, recreate=False) -> None:
+def split_train_test_dataset(data_file, save_path, log, recreate=False) -> None:
     '''
     划分数据集
     '''
@@ -203,7 +203,7 @@ def split_train_eval_dataset(data_file, save_path, log, recreate=False) -> None:
 
 
     train_file = os.path.join(save_path, 'train.json')
-    eval_file = os.path.join(save_path, 'eval.json')
+    test_file = os.path.join(save_path, 'test.json')
 
     data = []
 
@@ -216,14 +216,14 @@ def split_train_eval_dataset(data_file, save_path, log, recreate=False) -> None:
     train_data = data[0: split_idx]
     eval_data = data[split_idx: ]
 
-    log.info('train size: {}, eval size:{}'.format(len(train_data), len(eval_data)), save_to_file=True)
+    log.info('train size: {}, test size:{}'.format(len(train_data), len(eval_data)), save_to_file=True)
 
     os.makedirs(os.path.dirname(train_file), exist_ok=True)
     with open(train_file, 'w', encoding='utf-8') as f:
         ujson.dump(train_data, f, indent=4, ensure_ascii=False)
 
-    os.makedirs(os.path.dirname(eval_file), exist_ok=True)
-    with open(eval_file, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(test_file), exist_ok=True)
+    with open(test_file, 'w', encoding='utf-8') as f:
         ujson.dump(eval_data, f, indent=4, ensure_ascii=False)
 
     end = time.time()
@@ -256,7 +256,7 @@ def make_data_dpo():
     merge_rlhf_data(data_files, merge_file, log, recreate=recreate)
 
     # 3. split train and eval dataset
-    split_train_eval_dataset(merge_file, output_path, log, recreate=recreate)
+    split_train_test_dataset(merge_file, output_path, log, recreate=recreate)
 
 if __name__ == '__main__':
 
