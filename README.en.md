@@ -1,9 +1,8 @@
 <div align="center">
 
-# 中文对话模型 0.2B Small Chat Language Model 0.2B  
+# Small Chat Language Model 0.2B  
 
-中文  | [English](./README.en.md)  
-
+[中文](./README.md) | English
 </div>
  
 # 一、介绍 
