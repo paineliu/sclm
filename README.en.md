@@ -3,50 +3,50 @@
 # Small Chat Language Model 0.2B  
 
 [中文](./README.md) | English
+
 </div>
  
-# 一、介绍 
-SCLM是一个从头开始训练的中文对话模型。模型参数只有0.2B（算共享权重约210M），可以在最低4GB显存的机器进行预训练（`batch_size=1`，`fp16`或者` bf16`），`float16`加载、推理最少只需要512MB显存。
+# 1. Introduction 
+SCLM (Small Chat Language Model) is a Chinese conversation model trained from scratch. The model parameters are only 0.2B (about 210M in shared weights), and can be pre-trained on machines with a minimum of 4GB of video memory ('batch_size=1', 'fp16' or 'bf16'), and 'float16' only needs at least 512MB of video memory for loading and inference.
 
-项目实现了生成式语言模型的完整训练流程，包括：数据清洗、tokenizer训练、模型预训练、SFT指令微调、RLHF优化等。 
+The project implements a complete training process of generative language models, including: data cleaning, tokenizer training, model pre-training, SFT instruction fine-tuning, RLHF optimization, etc. 
 
-**最近更新**
+**RECENT UPDATE**
 
 <details close> 
 <summary> <b>2024-01-31</b> </summary>
-- 项目开源， 开放模型权重供下载。 <br/>
+- The project is open source, and the model weights are open for download. <br/>
 </details>
 
+# 2. SCLM-0.2B model training process 
 
-# 二、SCLM-0.2B模型训练过程 
+## 2.1 Dataset
+All datasets are from the single-round conversation dataset published on the Internet, and are cleaned and formatted and saved as parquet files.
 
-## 2.1 数据集
-所有数据集均来自互联网公开的**单轮对话**数据集，经过数据清洗、格式化后保存为parquet文件。
+### 2.1.1 Pretrained dataset
 
-### 2.1.1 预训练数据集
+Datasets used include: 
 
-使用的数据集包括： 
+1. Community Q&A JSON version webtext2019zh - large-scale high-quality dataset, see: [nlp_Chinese_corpus](https://github.com/brightmart/nlp_chinese_corpus).
+2. baike_qa2019 encyclopedia questions and answers, see: [baike_qa2019] (https://aistudio.baidu.com/datasetdetail/107726).
+3. For the Q&A dataset in the field of Chinese medicine, see: [Chinese-medical-dialogue-data](https://github.com/Toyhom/Chinese-medical-dialogue-data).
+4. For Zhihu Q&A data, see: [Zhihu-KOL] (https://huggingface.co/datasets/wangrui6/Zhihu-KOL).
+5. Belle open source instruction training data, introduction: [BELLE] (https://github.com/LianjiaTech/BELLE), download: [BelleGroup] (https://huggingface.co/BelleGroup), select "Belle_open_source_1M", "train_2M_CN" part of the answers are shorter, Data that does not contain complex table structures or translation tasks.
+6. Wikipedia entry data, piecing together the entries as prompts, the first 'N' words of the encyclopedia are answers, using the encyclopedia data of '202310'. Wiki download: [zhwiki](https://dumps.wikimedia.org/zhwiki/), convert the downloaded bz2 file to wiki.txt reference: [WikiExtractor](https://github.com/apertium/WikiExtractor). 
 
-1. 社区问答json版webtext2019zh-大规模高质量数据集，见：[nlp_chinese_corpus](https://github.com/brightmart/nlp_chinese_corpus)。
-2. baike_qa2019百科类问答，见：[baike_qa2019](https://aistudio.baidu.com/datasetdetail/107726)。
-3. 中国医药领域问答数据集，见：[Chinese-medical-dialogue-data](https://github.com/Toyhom/Chinese-medical-dialogue-data)。
-4. 知乎问答数据，见：[Zhihu-KOL](https://huggingface.co/datasets/wangrui6/Zhihu-KOL)。
-5. belle开源的指令训练数据，介绍：[BELLE](https://github.com/LianjiaTech/BELLE)，下载：[BelleGroup](https://huggingface.co/BelleGroup)，选取`Belle_open_source_1M`、`train_2M_CN`中部分回答较短、不含复杂表格结构、翻译任务的数据。
-6. 维基百科（Wikipedia）词条数据，将词条拼凑为提示语，百科的前`N`个词为回答，使用`202310`的百科数据。Wiki下载：[zhwiki](https://dumps.wikimedia.org/zhwiki/)，将下载的bz2文件转换为wiki.txt参考：[WikiExtractor](https://github.com/apertium/WikiExtractor)。 
-
-数据示例：
+Data examples:
 ```json
 {
     "prompt": "对于花园街，你有什么了解或看法吗？",
     "response": "花园街（是香港油尖旺区的一条富有特色的街道，位于九龙旺角东部，北至界限街，南至登打士街，与通菜街及洗衣街等街道平行。现时这条街道是香港著名的购物区之一。位于亚皆老街以南的一段花园街，也就是\"波鞋街\"整条街约150米长，有50多间售卖运动鞋和运动用品的店舖。旺角道至太子道西一段则为排档区，售卖成衣、蔬菜和水果等。花园街一共分成三段。明清时代，花园街是芒角村栽种花卉的地方。此外，根据历史专家郑宝鸿的考证：花园街曾是1910年代东方殷琴拿烟厂的花园。纵火案。自2005年起，花园街一带最少发生5宗纵火案，当中4宗涉及排档起火。2010年。2010年12月6日，花园街222号一个卖鞋的排档于凌晨5时许首先起火，浓烟涌往旁边住宅大厦，消防接报4"
 }
 ```
-### 2.1.2 SFT微调数据集
+### 2.1.2 SFT fine-tuning datasets
 
-使用的数据集包括： 
-1. belle开源的指令训练数据，介绍：[BELLE](https://github.com/LianjiaTech/BELLE)，下载：[BelleGroup](https://huggingface.co/BelleGroup)，选取[generated_chat_0.4M](https://huggingface.co/datasets/BelleGroup/generated_chat_0.4M)、[train_0.5M_CN](https://huggingface.co/datasets/BelleGroup/train_0.5M_CN)。
+Datasets used include: 
+1. Belle's open-source instruction training data, introduction: [BELLE] (https://github.com/LianjiaTech/BELLE), download: [BelleGroup] (https://huggingface.co/BelleGroup), select [generated_chat_0.4M]( https://huggingface.co/datasets/BelleGroup/generated_chat_0.4M)、[train_0.5M_CN](https://huggingface.co/datasets/BelleGroup/train_0.5M_CN)。
 
-数据示例：
+Data examples:
 ```json
 {
     "prompt": "解释什么是欧洲启示录",
@@ -54,12 +54,12 @@ SCLM是一个从头开始训练的中文对话模型。模型参数只有0.2B（
 }
 ```
 
-### 2.1.3 DPO优化数据集
-1. 数据集：[alpaca-gpt4-data-zh](https://huggingface.co/datasets/c-s-ale/alpaca-gpt4-data-zh)，微调的`chosen`文本来自数据集，拒绝文本`rejected`来自SFT微调1个epoch后的模型输出
-2. 数据集：[huozi_rlhf_data_json](https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
-3. 数据集：[rlhf-reward-single-round-trans_chinese](https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
+### 2.1.3 DPO Optimization Dataset
+1. Dataset: [alpaca-gpt4-data-en](https://huggingface.co/datasets/c-s-ale/alpaca-gpt4-data-zh), the fine-tuned 'chosen' text comes from the dataset, and the reject text 'rejected' comes from the model output after SFT fine-tuning 1 epoch
+2. Dataset: [huozi_rlhf_data_json] (https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
+3. Dataset: [rlhf-reward-single-round-trans_Chinese] (https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
 
-数据示例：
+Data examples:
 ```json
     {
         "prompt": "为给定的产品创建一个创意标语。，输入：可重复使用的水瓶。",
@@ -68,48 +68,48 @@ SCLM是一个从头开始训练的中文对话模型。模型参数只有0.2B（
     }
 ```
 
-## 2.2 模型
+## 2.2 Model
 
-T5模型（Text-to-Text Transfer Transformer），详情见论文: [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683)。
+T5 model (Text-to-Text Transfer Transformer), see the paper: [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683).
 
-模型源码来自huggingface，见：[T5ForConditionalGeneration](https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557)。
+The source code of the model is from huggingface, see: [T5ForConditionalGeneration] (https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557).
 
-模型配置见[model_config.json](https://huggingface.co/charent/ChatLM-mini-Chinese/blob/main/config.json)，官方的`T5-base`：`encoder layer`和`decoder layer `均为为12层，本项目这两个参数修改为10层。 
+See [model_config.json] (https://huggingface.co/charent/ChatLM-mini-Chinese/blob/main/config.json) for model configuration, the official 'T5-base': 'encoder layer' and 'decoder layer' are both 12 layers, and these two parameters in this project are modified to 10 layers. 
 
-模型参数：0.2B。
+Model parameters: 0.2B.
 
-## 2.3 训练过程
-硬件：
+## 2.3 Training Process
+Hardware:
 ```bash
 CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
-内存：128 GB
-显卡：NVIDIA GeForce RTX 4090 Ti 24GB * 1
+RAM: 128 GB
+Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 ```
-1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`scripts/make_data_train.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_rlhf.py`生成DPO优化数据。
+1. Generate Training Data: Place the data file according to the directory structure in the training script, and then execute: scripts/make_data_train.py to generate pre-training data, tools/make_data_sft.py to generate SFT fine-tuning data, and tools/make_data_rlhf.py to generate DPO optimization data after fine-tuning model training.
 
-2. **tokenizer 训练**： 执行：`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
+2. **tokenizer training**: Execute: 'tools/make_token.py' to generate 'tonknizer', the training inventory is in the OOM problem, load 10 million pieces of data, about 100GB memory is required, and the appropriate amount of data can be selected for training according to the hardware situation.
 
-3. **Text-to-Text 预训练**：执行：`sclm/trainer_pre.py`进行模型预训练。
+3. **Text-to-Text Pre-training**: Execute: 'sclm/trainer_pre.py' to pre-train the model.
 
-4. **prompt监督微调（SFT）**：执行：`sclm/trainer_sft.py`进行SFT微调。 
+4. Prompt Supervised Fine-Tuning (SFT): Execute: 'sclm/trainer_sft.py' to perform SFT fine-tuning. 
 
-5. **dpo直接偏好优化**：执行：`sclm/trainer_dpo.py`进行模型偏好优化。 
+5. DPO Direct Preference Optimization: Execute: 'SCLM/trainer_dpo.py' for model preference optimization. 
 
-## 2.4 效果展示
+## 2.4 Effect Display
 
-默认使用`huggingface transformers`的 `TextIteratorStreamer`实现流式对话，只支持`greedy search`，如果需要`beam sample`等其他生成方式，请将`cli_demo.py`的`stream_chat`参数修改为`False`。
+By default, the 'TextIteratorStreamer' of 'huggingface transformers' is used to implement streaming conversations, only 'greedy search' is supported, if you need other generation methods such as 'beam sample', please modify the 'stream_chat' parameter of 'cli_demo.py' to 'False'.
 
-1. 控制台运行：
+1. Console Operation
 ```bash
 python cli_demo.py
 ```
 
-2. API调用
+2. API calls
 ```bash
 python api_demo.py
 ```
 
-API调用示例：
+Example of API call:
 ```bash
 curl --location '127.0.0.1:8192/api/chat' \
 --header 'Content-Type: application/json' \
@@ -118,11 +118,12 @@ curl --location '127.0.0.1:8192/api/chat' \
 }'
 ```
 
-存在问题：预训练数据集只有1000多万条，模型参数也仅0.2B，会有答非所问、废话生成器的情况。
+There is a problem: there are only more than 10 million pre-trained datasets, and the model parameters are only 0.2B.
 
-# 三、引用
+# 3. References
 
-如果你觉得本项目对你有所帮助，欢迎引用。
+If you find this project helpful, please feel free to refer to it.
+
 ```conf
 @misc{paineliu2024,
     author={liu tingchao},
@@ -134,12 +135,13 @@ curl --location '127.0.0.1:8192/api/chat' \
 }
 ```
 
-# 四、其他事项
-本项目不承担开源模型和代码导致的数据安全、舆情风险或发生任何模型被误导、滥用、传播、不当利用而产生的风险和责任。
+# 4. Other matters
+The project does not assume the risks and responsibilities for data security and public opinion caused by open source models and codes, or the risks and responsibilities arising from the misleading, abuse, dissemination and improper use of any models.
 
-# 五、感谢
+# 5. Thanks
 
-本项目参考了ChatLM-mini-Chinese项目，并基于这个项目修改，在此表示深深的谢意。
+This project refers to the ChatLM-mini-Chinese project and is modified based on this project, and I would like to express my deep gratitude.
+
 ```conf
 @misc{Charent2023,
     author={Charent Chen},
