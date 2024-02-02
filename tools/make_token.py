@@ -126,7 +126,7 @@ def make_token():
     
     log = Logger('make_token', save2file=True, file_name= './logs/make_token' + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log')
     recreate = False
-    train_hf_bpe_tokenizer('./data/result/sc_data_pretrain.txt', './data/tmp/tokenizer/hf_bpe_tokenizer.json', './output/tokenizer', log, recreate=recreate, max_train_line=10000000)
+    train_hf_bpe_tokenizer('./data/result/sc_data_pertrain.txt', './data/tmp/tokenizer/hf_bpe_tokenizer.json', './output/tokenizer', log, recreate=recreate, max_train_line=10000000)
 
 if __name__ == '__main__':
 
