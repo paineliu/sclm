@@ -582,10 +582,10 @@ class ChatTrainer:
 if __name__ == '__main__':
 
     train_config = TrainConfig()
-    train_config = TrainConfig(epochs=20, dataset_path='./data/result/schat_dataset_mini', train_path = './data/model/schat_model_mini', output_model_file = './output/model/schat_model_mini.bin')
+    train_config = TrainConfig(epochs=20, dataset_path='./data/result/sc_data_mini', train_path = './data/model/schat_model_mini', output_model_file = './output/model/schat_model_mini.bin')
     model_config = T5ModelConfig()
 
     chat_trainer = ChatTrainer(train_config=train_config, model_config=model_config)
 
-    chat_trainer.train()
+    chat_trainer.train(is_keep_training=True)
     chat_trainer.test(train_config.output_model_file)

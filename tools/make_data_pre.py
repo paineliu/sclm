@@ -1046,16 +1046,16 @@ def make_data_pre():
 
     # dataset
     merge_dataset('./data/tmp/dataset/data_pre', './data/tmp/dataset/data_pre/merge/data_pre_merge.parquet_', log, recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
-    shuffle_dataset('./data/tmp/dataset/data_pre/merge/data_pre_merge.parquet_', './data/result/sc_data_pertrain.parquet', log, recreate=recreate, seed=23333)
-    split_datasets('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain', log, recreate=recreate, max_len=320, groups_cnt=50000)
+    shuffle_dataset('./data/tmp/dataset/data_pre/merge/data_pre_merge.parquet_', './data/result/sc_data_pretrain.parquet', log, recreate=recreate, seed=23333)
+    split_datasets('./data/result/sc_data_pretrain.parquet', './data/result/sc_data_pretrain', log, recreate=recreate, max_len=320, groups_cnt=50000)
 
     # convert
-    parquet_to_text('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain.txt', log, recreate=recreate)
-    parquet_to_json('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain.json', log, recreate=recreate)
+    parquet_to_text('./data/result/sc_data_pretrain.parquet', './data/result/sc_data_pretrain.txt', log, recreate=recreate)
+    parquet_to_json('./data/result/sc_data_pretrain.parquet', './data/result/sc_data_pretrain.json', log, recreate=recreate)
 
     # stat
     stat_data_line_total('./data/tmp/dataset/data_pre', log)
-    draw_sentence_len_image('./data/result/sc_data_pertrain.parquet', './img/sc_data_pertrain_sentence_length.png', log)
+    draw_sentence_len_image('./data/result/sc_data_pretrain.parquet', './img/sc_data_pretrain_sentence_length.png', log)
 
 
 if __name__ == '__main__':

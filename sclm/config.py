@@ -1,4 +1,5 @@
 import os
+import time
 from dataclasses import dataclass
 from transformers import T5Config
 from os.path import dirname, abspath
@@ -86,10 +87,11 @@ class TrainConfig:
         self.test_file: str  = os.path.join(self.dataset_path, 'test.parquet')
         self.valid_file: str = os.path.join(self.dataset_path, 'valid.parquet')
 
-        self.model_file: str        = os.path.join(self.train_path, 'cbot_model.{}.bin')
+        self.model_file: str        = os.path.join(self.train_path, 'sc_model_pretrain.{}.bin')
         self.config_file: str       = os.path.join(self.train_path, 'config.json')
-        self.latest_state_dir: str  = os.path.join(self.train_path, 'cbot_model_latest')
-        self.best_state_dir: str    = os.path.join(self.train_path, 'cbot_model_best')
+        self.latest_state_dir: str  = os.path.join(self.train_path, 'sc_model_pretrain_latest')
+        self.best_state_dir: str    = os.path.join(self.train_path, 'sc_model_pretrain_best')
+        self.trainer_log_file: str  = './logs/train_pre' + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log'
 
     epochs: int = 100
     batch_size_per_gpu: int = 16
@@ -105,25 +107,25 @@ class TrainConfig:
     warmup_steps: int = 1024                        # 模型参数预热步数，预热样本数=warmup_steps * batch_size * gradient_accumulation_steps
     
     # dataset
-    dataset_path: str      = './data/result/schat_dataset'
+    dataset_path: str      = './data/result/sc_data_pretrain'
 
-    train_file: str        = './data/result/schat_dataset/train.parquet'
-    valid_file: str   = './data/result/schat_dataset/valid.parquet'
-    test_file: str         = './data/result/schat_dataset/test.parquet'
+    train_file: str        = 'train.parquet'
+    valid_file: str        = 'valid.parquet'
+    test_file: str         = 'test.parquet'
     
     # token
     tokenizer_dir: str     = './output/tokenizer'
    
     # train
-    train_path: str        = './data/model/schat_model'
+    train_path: str        = './data/model/sc_model_pretrain'
     
-    model_file: str        = './data/model/schat_model/schat_model.{}.bin'
-    config_file: str       = './data/model/schat_model/config.json'
-    latest_state_dir: str  = './data/model/schat_model/schat_model_latest'
-    best_state_dir: str    = './data/model/schat_model/schat_model_best'
+    model_file: str        = 'sc_model_pretrain.{}.bin'
+    config_file: str       = 'config.json'
+    latest_state_dir: str  = 'sc_model_pretrain_latest'
+    best_state_dir: str    = 'sc_model_pretrain_best'
 
     # output
-    output_model_file: str = './output/model/schat_model.bin'
+    output_model_file: str = './output/model/sc_model_pretrain.bin'
 
     logging_steps: int = 50
     save_steps: int = 10000
