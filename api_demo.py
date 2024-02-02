@@ -49,7 +49,7 @@ if __name__ == '__main__':
     uvicorn.run(
         'api_demo:app',
         host='0.0.0.0',
-        port=8094,
+        port=8192,
         reload=True,
         workers=8,
         log_level='info')
