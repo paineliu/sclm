@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from chatbot import ChatBot, InferConfig
+from sclm import ChatBot, InferConfig
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -11,8 +11,8 @@ from safetensors.torch import load_model
 
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
-from chatbot.textmodel import TextToTextModel
-from chatbot.config import InferConfig, T5ModelConfig, get_T5_config
+from sclm.model import TextToTextModel
+from sclm.config import InferConfig, T5ModelConfig, get_T5_config
 
 class ChatBot:
     def __init__(self, infer_config: InferConfig) -> None:
@@ -128,7 +128,7 @@ class ChatBot:
 
 if __name__ == '__main__':
 
-    infer_config = InferConfig(model_file = './output/model/cbot_model.bin')
+    infer_config = InferConfig(model_file = './output/model/schat_model.bin')
 
     chatbot = ChatBot(infer_config=infer_config)
 

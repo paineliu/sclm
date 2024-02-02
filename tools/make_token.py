@@ -12,9 +12,9 @@ from multiprocessing.managers import BaseManager
 import os 
 import time
 
-from chatbot import Logger
+from sclm import Logger
 
-def train_hf_bpe_tokenizer(corpus_filename, token_filename, pretrained_token_pathname, recreate=False, max_train_line: int=None) -> None:
+def train_hf_bpe_tokenizer(corpus_filename, token_filename, pretrained_token_pathname, log, recreate=False, max_train_line: int=None) -> None:
     '''
     训练tokenizer with huggingface 1000万条数据大约需要100G内存。
     '''
@@ -123,9 +123,10 @@ def trained_tokenizer_to_pretrained_tokenizer_fast(trained_token_filename, pretr
     tokenizer.save_pretrained(pretrained_token_pathname)
 
 def make_token():
-    global log
-    log = Logger('make_token', save2file=True, file_name= './logs/make_token.log')
-    train_hf_bpe_tokenizer('./data/result/cbot_dataset.txt', './data/result/hf_bpe_tokenizer.json', './output/tokenizer', max_train_line=10000000)
+    
+    log = Logger('make_token', save2file=True, file_name= './logs/make_token' + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log')
+    recreate = False
+    train_hf_bpe_tokenizer('./data/result/sc_data_pretrain.txt', './data/tmp/tokenizer/hf_bpe_tokenizer.json', './output/tokenizer', log, recreate=recreate, max_train_line=10000000)
 
 if __name__ == '__main__':
 

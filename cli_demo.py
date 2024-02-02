@@ -5,7 +5,7 @@ from threading import Thread
 from rich.text import Text
 from rich.live import Live
 
-from chatbot import ChatBot, InferConfig
+from sclm import ChatBot, InferConfig
 
 infer_config = InferConfig()
 chat_bot = ChatBot(infer_config=infer_config)

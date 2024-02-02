@@ -17,11 +17,11 @@ from torch_optimizer import Adafactor
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 
-from chatbot.textmodel import TextToTextModel
-from chatbot.logger import Logger
-from chatbot.dataset import ChatDataset
-from chatbot.config import TrainConfig, T5ModelConfig, get_T5_config
-from chatbot.functions import (
+from sclm.model import TextToTextModel
+from sclm.logger import Logger
+from sclm.dataset import ChatDataset
+from sclm.config import TrainConfig, T5ModelConfig, get_T5_config
+from sclm.functions import (
     get_bleu4_score, 
     save_model_config, 
     get_free_space_of_disk, 
@@ -57,8 +57,6 @@ class ChatTrainer:
             ins = input()
             
             if ins.lower() in ('yes', 'y'):
-
-                suffix =  'exit_save_{}'.format(str(time.strftime('%Y%m%d%H%M%S', time.localtime())))
 
                 self.accelerator.wait_for_everyone()
                 self.accelerator.save_state(output_dir=self.train_config.latest_state_dir)
@@ -583,7 +581,7 @@ class ChatTrainer:
 
 if __name__ == '__main__':
 
-    # train_config = TrainConfig(epochs=20, dataset_path='./data/result/cbot_dataset_mini', train_path = './data/model/cbot_model_mini', output_model_file = './output/model/cbot_model_mini.bin')
+    # train_config = TrainConfig(epochs=20, dataset_path='./data/result/schat_dataset_mini', train_path = './data/model/schat_model_mini', output_model_file = './output/model/schat_model_mini.bin')
     train_config = TrainConfig()
     model_config = T5ModelConfig()
 

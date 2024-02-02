@@ -18,7 +18,7 @@ from fastparquet import ParquetFile, write
 import pyarrow.parquet as pq
 from opencc import OpenCC
 
-from chatbot import Logger
+from sclm import Logger
 
 punctuation = set("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~.,;《》？！“”‘’@#￥%…&×（）——+【】{};；●，。&～、|\s:：\n")
 en_punctuation = ",().!;:"
@@ -118,7 +118,7 @@ def read_and_write_template(read_file: str, write_to_file: str, call_back: objec
     end = time.time()
     return (raw_line_cnt, keep_line_cnt, end -start)
 
-def process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, call_func_name):
+def process_data_files(data_pathname, save_filename, log, recreate, data_filenames, process_function, call_func_name):
     log_items = []
     save_log_filename = save_filename + ".log"    
 
@@ -152,7 +152,7 @@ def process_data_files(data_pathname, save_filename, recreate, data_filenames, p
 
     log.info('{} {} success'.format(call_func_name, data_pathname), save_to_file=True)
 
-def process_web_text_zh(data_pathname, save_filename, recreate=False, keep_start: int=5, response_less_word: int=10) -> None:
+def process_web_text_zh(data_pathname, save_filename, log, recreate=False, keep_start: int=5, response_less_word: int=10) -> None:
     '''
     处理425万社区问答webtext2019zh知识类数据集
     keep_start: 只保留点赞数大于keep_start的问答
@@ -160,7 +160,7 @@ def process_web_text_zh(data_pathname, save_filename, recreate=False, keep_start
     '''
     data_filenames = [
         os.path.join(data_pathname, 'web_text_zh_test.json'),
-        # os.path.join(data_pathname, 'web_text_zh_train.json'),
+        os.path.join(data_pathname, 'web_text_zh_train.json'),
         os.path.join(data_pathname, 'web_text_zh_valid.json'),
     ]
 
@@ -180,9 +180,9 @@ def process_web_text_zh(data_pathname, save_filename, recreate=False, keep_start
         }
         return write_dict
     
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
+    process_data_files(data_pathname, save_filename, log, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
     
-def process_baike_qa(data_pathname, save_filename, recreate=False, response_less_word: int=15) -> None:
+def process_baike_qa(data_pathname, save_filename, log, recreate=False, response_less_word: int=15) -> None:
     '''
     处理147万百度知道知识类数据集
     '''
@@ -227,16 +227,15 @@ def process_baike_qa(data_pathname, save_filename, recreate=False, response_less
 
         return write_dict
 
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
+    process_data_files(data_pathname, save_filename, log, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
-def process_belle_knowledge(data_pathname, save_filename, recreate=False, response_less_words: int=15, group_cnt: int=10000) -> None:
+def process_belle_knowledge(data_pathname, save_filename, log, recreate=False, response_less_words: int=15, group_cnt: int=10000) -> None:
     '''
     处理belle开源的知识增强数据集
     '''
     data_filenames = [
         os.path.join(data_pathname, 'Belle_open_source_1M.json'),
-        os.path.join(data_pathname, 'train_2M_CN.json'),
-        os.path.join(data_pathname, 'train_3.5M_CN.json'),
+        os.path.join(data_pathname, 'train_2M_CN.json')
     ]
 
     def process_function(line: str) -> dict:
@@ -271,9 +270,9 @@ def process_belle_knowledge(data_pathname, save_filename, recreate=False, respon
 
         return write_dict
     
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
+    process_data_files(data_pathname, save_filename, log, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
-def process_belle_knowledge_finetune_sft(data_pathname, save_filename, recreate=False, max_len: int=320, group_cnt: int=50000) -> None:
+def process_belle_knowledge_finetune_sft(data_pathname, save_filename, log, recreate=False, max_len: int=320, group_cnt: int=50000) -> None:
     '''
     处理belle开源的知识增强数据集
     '''
@@ -310,7 +309,7 @@ def process_belle_knowledge_finetune_sft(data_pathname, save_filename, recreate=
 
         return write_dict
 
-    process_data_files(data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
+    process_data_files(data_pathname, save_filename, log, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
 def csv_gbk_utf8_file(gbk_filename: str, utf8_filename: str) -> None:
     '''
@@ -330,7 +329,7 @@ def csv_gbk_utf8_file(gbk_filename: str, utf8_filename: str) -> None:
             writer = csv.writer(f_utf8)
             writer.writerows(new_lines)
 
-def process_chinese_medical(gbk_data_pathname, utf8_data_pathname, save_filename, recreate=False, response_less_word: int=15) -> None:
+def process_chinese_medical(gbk_data_pathname, utf8_data_pathname, save_filename, log, recreate=False, response_less_word: int=15) -> None:
     '''
     处理中国医药领域问答数据集
     '''
@@ -395,9 +394,9 @@ def process_chinese_medical(gbk_data_pathname, utf8_data_pathname, save_filename
                 else:
                     log.info('{} {} skip'.format(sys._getframe().f_code.co_name, gbk_filename), save_to_file=True)
 
-    process_data_files(gbk_data_pathname, save_filename, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
+    process_data_files(gbk_data_pathname, save_filename, log, recreate, data_filenames, process_function, sys._getframe().f_code.co_name)
 
-def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_word: int=4, response_less_word: int=10, group_cnt: int=10000) -> None:
+def process_zhihu_kol(data_pathname, save_filename, log, recreate=False, prompt_less_word: int=4, response_less_word: int=10, group_cnt: int=10000) -> None:
     '''
     处理知乎数据集
     '''
@@ -487,7 +486,7 @@ def process_zhihu_kol(data_pathname, save_filename, recreate=False, prompt_less_
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_pathname), save_to_file=True)
 
-def process_zh_wiki(data_filename, save_filename, txt_filename, recreate=False, groups_cnt: int=10000, max_len: int=512, seed: int=23333) -> None:
+def process_zh_wiki(data_filename, save_filename, txt_filename, log, recreate=False, groups_cnt: int=10000, max_len: int=512, seed: int=23333) -> None:
     '''
     将Wiki中文数转换为问答数据集
     wiki 下载地址：https://dumps.wikimedia.org/zhwiki/
@@ -547,6 +546,9 @@ def process_zh_wiki(data_filename, save_filename, txt_filename, recreate=False, 
         return
     
     np.random.seed(seed)
+    os.makedirs(os.path.dirname(txt_filename), exist_ok=True)
+    os.makedirs(os.path.dirname(save_filename), exist_ok=True)
+
     f_txt = open(txt_filename, 'w', encoding='utf-8')
 
     raw_line_cnt, keep_line_cnt = 0, 0
@@ -616,7 +618,7 @@ def process_zh_wiki(data_filename, save_filename, txt_filename, recreate=False, 
 
     log.info('{} success'.format(data_filename), save_to_file=True)
 
-def merge_dataset(data_pathname, save_filename, recreate=False, groups_cnt: int=50000, max_len: int=512, min_len: int=3, cut_max_len: bool=False) -> None:
+def merge_dataset(data_pathname, save_filename, log, recreate=False, groups_cnt: int=50000, max_len: int=512, min_len: int=3, cut_max_len: bool=False) -> None:
     '''
     将多个数据集合并为一个数据集
     '''
@@ -682,7 +684,7 @@ def merge_dataset(data_pathname, save_filename, recreate=False, groups_cnt: int=
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_pathname), save_to_file=True)
 
-def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed: int=23333, groups_cnt: int=65536) -> None:
+def shuffle_dataset(data_filename: str, save_filename: str, log, recreate=False, seed: int=23333, groups_cnt: int=65536) -> None:
     '''
     打乱一个parquet文件数据集
     '''
@@ -708,7 +710,8 @@ def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed
         
     # 分块写入parquet，否则小内存读取直接OOM
     n = len(df)
-    for i in range(0, n, groups_cnt):
+    
+    for i in progress.track(range(0, n, groups_cnt)):
         cur_group_df = df[i: i + groups_cnt]
         write_single_parquet_file(save_filename, cur_group_df)
     
@@ -722,7 +725,7 @@ def shuffle_dataset(data_filename: str, save_filename: str, recreate=False, seed
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, data_filename), save_to_file=True)
 
-def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, max_len: int=320, seed: int=23333, train_ratio: float=0.91, test_ratio: float=0.0875, valid_ratio: float=0.0025, groups_cnt: int=50000) -> None:
+def split_datasets(source_parquet_file: str, dataset_pathname, log, recreate=False, max_len: int=320, seed: int=23333, train_ratio: float=0.91, test_ratio: float=0.0875, valid_ratio: float=0.0025, groups_cnt: int=50000) -> None:
     '''
     将原始数据拆分为训练集、测试集和验证集
     '''
@@ -808,7 +811,7 @@ def split_datasets(source_parquet_file: str, dataset_pathname, recreate=False, m
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, source_parquet_file), save_to_file=True)
 
-def parquet_to_text(pq_filename, txt_filename, recreate=False, sep='[SEP]', buffer_size: int=50000) -> None:
+def parquet_to_text(pq_filename, txt_filename, log, recreate=False, sep='[SEP]', buffer_size: int=50000) -> None:
     '''
     将parquet文件转换为txt预料，句子之间用sep隔开
     txt文件用于训练tokenizer，使用huggingface的BPE训练会导致OOM
@@ -855,7 +858,7 @@ def parquet_to_text(pq_filename, txt_filename, recreate=False, sep='[SEP]', buff
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
 
-def parquet_to_json(pq_filename, json_filename) -> None:
+def parquet_to_json(pq_filename, json_filename, log, recreate=False) -> None:
     '''
     将parquet文件转换为json
     '''
@@ -897,7 +900,7 @@ def parquet_to_json(pq_filename, json_filename) -> None:
 
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
 
-def draw_sentence_len_image(pq_filename, img_filename) -> None:
+def draw_sentence_len_image(pq_filename, img_filename, log) -> None:
 
     log.info('{} {} -> {}'.format(sys._getframe().f_code.co_name, pq_filename, img_filename), save_to_file=True)
     start = time.time()
@@ -976,7 +979,7 @@ def draw_sentence_len_image(pq_filename, img_filename) -> None:
     log.info('time cost = {:.2f}s'.format(duration), save_to_file=True)
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
 
-def stat_data_line_total(pq_filename: str=None) -> None:
+def stat_data_line_total(pq_filename: str, log) -> None:
     '''
     统计parquet数据集数据量
     '''
@@ -1028,33 +1031,33 @@ def stat_data_line_total(pq_filename: str=None) -> None:
     log.info('{} {} success'.format(sys._getframe().f_code.co_name, pq_filename), save_to_file=True)
 
 
-def make_data_train():
-    global log
-    log = Logger('make_data_train', save2file=True, file_name='./logs/make_data_train.log')
+def make_data_pre():
+ 
+    log = Logger('make_data_pre', save2file=True, file_name='./logs/make_data_pre' + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log')
     recreate = False
 
     # data process
-    process_chinese_medical('./data/raw/chinese_medical', './data/raw/chinese_medical_utf8', './data/parquet/chinese_medical_uft8.parquet', recreate=recreate, response_less_word=15)
-    process_web_text_zh('./data/raw/web_text_zh', './data/parquet/web_text_zh.parquet', recreate=recreate, keep_start=5, response_less_word=15)
-    process_baike_qa('./data/raw/baike_qa', './data/parquet/baike_qa.parquet', recreate=recreate, response_less_word=15)
-    process_zhihu_kol('./data/raw/zhihu_kol','./data/parquet/zhihu_kol.parquet', recreate, prompt_less_word=4, response_less_word=10)
-    process_belle_knowledge('./data/raw/belle_knowledge', './data/parquet/belle_knowledge.parquet', recreate=recreate, response_less_words=5)
-    process_zh_wiki('./data/raw/zhwiki/wiki.txt', './data/parquet/zhwiki_cn.parquet', './data/raw/zhwiki/zhwiki_cn.txt', recreate=recreate, groups_cnt=10000, max_len=512)
+    process_chinese_medical('./data/raw/chinese_medical', './data/tmp/dataset/data_pre/chinese_medical_utf8', './data/tmp/dataset/data_pre/chinese_medical_uft8.parquet', log, recreate=recreate, response_less_word=15)
+    process_web_text_zh('./data/raw/web_text_zh', './data/tmp/dataset/data_pre/web_text_zh.parquet', log, recreate=recreate, keep_start=5, response_less_word=15)
+    process_baike_qa('./data/raw/baike_qa', './data/tmp/dataset/data_pre/baike_qa.parquet', log, recreate=recreate, response_less_word=15)
+    process_zhihu_kol('./data/raw/zhihu_kol','./data/tmp/dataset/data_pre//zhihu_kol.parquet', log, recreate=recreate, prompt_less_word=4, response_less_word=10)
+    process_belle_knowledge('./data/raw/belle_knowledge', './data/tmp/dataset/data_pre/belle_knowledge.parquet', log, recreate=recreate, response_less_words=5)
+    process_zh_wiki('./data/raw/zhwiki/wiki.txt', './data/tmp/dataset/data_pre/zhwiki_cn.parquet', './data/tmp/dataset/data_pre/zhwiki_cn/zhwiki_cn.txt', log, recreate=recreate, groups_cnt=10000, max_len=512)
 
     # dataset
-    merge_dataset('./data/parquet', './data/result/data_merge.parquet', recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
-    shuffle_dataset('./data/result/data_merge.parquet', './data/result/cbot_dataset.parquet', recreate=recreate, seed=23333)
-    split_datasets('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset', recreate=recreate, max_len=320, groups_cnt=50000)
+    merge_dataset('./data/tmp/dataset/data_pre', './data/tmp/dataset/data_pre/merge/data_pre_merge.parquet_', log, recreate=recreate, groups_cnt=50000, min_len=3, max_len=512, cut_max_len=True)
+    shuffle_dataset('./data/tmp/dataset/data_pre/merge/data_pre_merge.parquet_', './data/result/sc_data_pertrain.parquet', log, recreate=recreate, seed=23333)
+    split_datasets('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain', log, recreate=recreate, max_len=320, groups_cnt=50000)
 
     # convert
-    parquet_to_text('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.txt')
-    parquet_to_json('./data/result/cbot_dataset.parquet', './data/result/cbot_dataset.json')
+    parquet_to_text('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain.txt', log, recreate=recreate)
+    parquet_to_json('./data/result/sc_data_pertrain.parquet', './data/result/sc_data_pertrain.json', log, recreate=recreate)
 
     # stat
-    stat_data_line_total('./data/parquet')
-    draw_sentence_len_image('./data/result/cbot_dataset.parquet', './img/cbot_dataset_sentence_length.png')
+    stat_data_line_total('./data/tmp/dataset/data_pre', log)
+    draw_sentence_len_image('./data/result/sc_data_pertrain.parquet', './img/sc_data_pertrain_sentence_length.png', log)
 
 
 if __name__ == '__main__':
 
-    make_data_train()
+    make_data_pre()

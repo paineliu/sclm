@@ -114,7 +114,7 @@ class ChatDataset(Dataset):
         return self.length
 
 if __name__ == '__main__':
-    parquet_file =  './data/result/cbot_dataset/valid.parquet'
+    parquet_file =  './data/result/schat_dataset/valid.parquet'
     tokenizer_dir = './output/tokenizer'
 
     # example 1：

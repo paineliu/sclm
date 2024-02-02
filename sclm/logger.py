@@ -57,7 +57,7 @@ class Logger(object):
                 log_file = file_name
             else:
                 base_dir = '.'
-                log_file = base_dir + '/' + logger_name  + '-' + str(time.strftime('%Y%m%d', time.localtime())) +'.log'
+                log_file = base_dir + '/' + logger_name  + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log'
             os.makedirs(os.path.dirname(log_file), exist_ok=True)
             fh = logging.FileHandler(filename=log_file, mode='a', encoding='utf-8')
             fh.setLevel(level)

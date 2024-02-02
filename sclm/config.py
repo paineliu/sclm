@@ -13,7 +13,7 @@ class InferConfig:
     # 全量DPO模型文件
     tokenizer_dir: str     = './output/tokenizer'
 
-    model_file: str = './output/model/cbot_model.bin'
+    model_file: str = './output/model/schat_model.bin'
 
     # lora PDO 合并后的模型文件
     # model_file: str = './model_save/chat_small_t5.best.dpo.lora_merged.bin'
@@ -60,10 +60,10 @@ class DpoConfig:
 class SFTconfig:
     max_seq_len: int = 384 + 8                # 8 for eos token 
 
-    finetune_from_ckp_file = './output/model/cbot_model.bin'
+    finetune_from_ckp_file = './output/model/schat_model.bin'
     tokenizer_dir: str  = './output/tokenizer'
     sft_train_file: str = './data/sft_train.json'
-    output_dir: str     = './output/model/cbot_model_sft'
+    output_dir: str     = './output/model/schat_model_sft'
 
     batch_size: int = 12
     num_train_epochs: int = 4
@@ -105,30 +105,30 @@ class TrainConfig:
     warmup_steps: int = 1024                        # 模型参数预热步数，预热样本数=warmup_steps * batch_size * gradient_accumulation_steps
     
     # dataset
-    dataset_path: str      = './data/result/cbot_dataset'
+    dataset_path: str      = './data/result/schat_dataset'
 
-    train_file: str        = './data/result/cbot_dataset/train.parquet'
-    valid_file: str   = './data/result/cbot_dataset/valid.parquet'
-    test_file: str         = './data/result/cbot_dataset/test.parquet'
+    train_file: str        = './data/result/schat_dataset/train.parquet'
+    valid_file: str   = './data/result/schat_dataset/valid.parquet'
+    test_file: str         = './data/result/schat_dataset/test.parquet'
     
     # token
     tokenizer_dir: str     = './output/tokenizer'
    
     # train
-    train_path: str        = './data/model/cbot_model'
+    train_path: str        = './data/model/schat_model'
     
-    model_file: str        = './data/model/cbot_model/cbot_model.{}.bin'
-    config_file: str       = './data/model/cbot_model/config.json'
-    latest_state_dir: str  = './data/model/cbot_model/cbot_model_latest'
-    best_state_dir: str    = './data/model/cbot_model/cbot_model_best'
+    model_file: str        = './data/model/schat_model/schat_model.{}.bin'
+    config_file: str       = './data/model/schat_model/config.json'
+    latest_state_dir: str  = './data/model/schat_model/schat_model_latest'
+    best_state_dir: str    = './data/model/schat_model/schat_model_best'
 
     # output
-    output_model_file: str = './output/model/cbot_model.bin'
+    output_model_file: str = './output/model/schat_model.bin'
 
     logging_steps: int = 50
     save_steps: int = 10000
     
-    trainer_log_file: str = './logs/trainer.log'
+    trainer_log_file: str = './logs/train_per.log'
 
     keep_latest_n_ckp: int = 8                  # 训练过程中，最多保留多少个分数最好的模型文件
 

@@ -13,8 +13,8 @@ from tqdm import tqdm
 from transformers import PreTrainedTokenizerFast, Seq2SeqTrainer, DataCollatorForSeq2Seq,Seq2SeqTrainingArguments
 from transformers.generation.configuration_utils import GenerationConfig
 
-from chatbot.textmodel import TextToTextModel
-from chatbot.config import SFTconfig, T5ModelConfig, get_T5_config
+from sclm.model import TextToTextModel
+from sclm.config import SFTconfig, T5ModelConfig, get_T5_config
 
 tqdm.pandas()
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'

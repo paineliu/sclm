@@ -3,6 +3,7 @@ sys.path.extend(['.','..'])
 
 import os
 import re
+import time
 import torch
 import pandas as pd
 import numpy as np
@@ -10,12 +11,23 @@ import ujson
 from rich import progress
 import pyarrow.parquet as pq
 
-from chatbot import Logger, InferConfig, ChatBot
+from sclm import Logger, InferConfig, ChatBot
 
-def generate_alpaca_gpt4_reject_response(read_file, sava_file, recreate=False, groups_cnt: int=50000, max_len: int=512, batch_size: int=32) -> None:
+def generate_alpaca_gpt4_reject_response(read_file, save_file, log, recreate=False, groups_cnt: int=50000, max_len: int=512, batch_size: int=32) -> None:
     '''
     生成不是很满意的回答
     '''
+    log_items = []
+    save_log_filename = save_file + ".log"    
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, read_file))
+    log.info(log_items[-1], save_to_file=True)
+
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, read_file), save_to_file=True)
+        return
+        
+    start = time.time()
+
     # load config
     infer_config = InferConfig()
     cbot = ChatBot(infer_config)
@@ -24,7 +36,7 @@ def generate_alpaca_gpt4_reject_response(read_file, sava_file, recreate=False, g
     tokenizer = cbot.tokenizer
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    my_data = []
+    data_valid = []
     with open(read_file, 'r', encoding='utf-8') as f:
         data = ujson.load(f)
         print('length of {} is {}'.format(read_file, len(data)))
@@ -43,27 +55,24 @@ def generate_alpaca_gpt4_reject_response(read_file, sava_file, recreate=False, g
 
             if len(prompt) == 0 or len(response) == 0: continue
 
-            my_data.append(
+            data_valid.append(
                 {
                     'prompt': prompt,
                     'chosen': response
                 }
             )
     
-    log.info('length of {} is {}'.format(dpo_json_file, len(my_data)), save_to_file=True)
+    log.info('valid data length of {} is {}'.format(save_file, len(data_valid)), save_to_file=True)
 
     model_outs = []
     batch_prompt = []
     process_item = []
-    for i, item in progress.track(enumerate(my_data), total=len(my_data)):
+    for i, item in progress.track(enumerate(data_valid), total=len(data_valid)):
         # 模型生成的答案为拒绝答案
         batch_prompt.append(f"{item['prompt']}[EOS]")
         process_item.append(item)
         
-        if i % 500 == 0: 
-            print('process {} items.'.format(i))
-
-        if len(batch_prompt) >= batch_size or i == len(my_data) - 1:
+        if len(batch_prompt) >= batch_size or i == len(data_valid) - 1:
             
             encoded = tokenizer.batch_encode_plus(batch_prompt, truncation=False, padding=True)
 
@@ -81,31 +90,45 @@ def generate_alpaca_gpt4_reject_response(read_file, sava_file, recreate=False, g
                 outputs = tokenizer.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=True)
 
             model_outs.extend(outputs)
-                
-      
             batch_prompt = []
-        if len(model_outs) > 100:
-            break
               
     for i in range(len(model_outs)):
         process_item[i]['reject'] = model_outs[i]
 
-    with open(dpo_json_file, 'w', encoding='utf-8') as f:
+    with open(save_file, 'w', encoding='utf-8') as f:
         ujson.dump(process_item, f, indent=4, ensure_ascii=False)
     
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()   
     
 def replace_line(s: str) -> str:
     '''将双斜杠替换为单斜杠，既是 \\n 替换为 \n
     '''
     return re.sub('\\\\n', '\n', s)
 
-def merge_rlhf_data(data_files, save_file, recreate=False, max_len: int=512) -> None:
+def merge_rlhf_data(data_files, save_file, log, recreate=False, max_len: int=512) -> None:
     ''''
     处理RM高质量回答部分
     数据集：https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json
     https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese
     '''
-    my_data = []
+    log_items = []
+    save_log_filename = save_file + ".log"    
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, save_file))
+    log.info(log_items[-1], save_to_file=True)
+
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, save_file), save_to_file=True)
+        return
+        
+    start = time.time()
+
+    data_lst = []
 
     max_len += 8 # for eos token
 
@@ -125,7 +148,7 @@ def merge_rlhf_data(data_files, save_file, recreate=False, max_len: int=512) -> 
                 if len(prompt) == 0 or len(chosen) == 0 or len(reject) == 0 or reject.strip() == chosen.strip(): 
                     continue
                 
-                my_data.append({
+                data_lst.append({
                         'prompt': replace_line(prompt),
                         'chosen': replace_line(chosen),
                         'rejected': replace_line(reject),
@@ -145,20 +168,39 @@ def merge_rlhf_data(data_files, save_file, recreate=False, max_len: int=512) -> 
                 if len(prompt) == 0 or len(chosen) == 0 or len(rejected) == 0 or rejected.strip() == chosen.strip(): 
                     continue
                 
-                my_data.append({
+                data_lst.append({
                         'prompt': replace_line(prompt),
                         'chosen': replace_line(chosen),
                         'rejected': replace_line(rejected),
                 })
-    print('length of {} is {}'.format(save_file, len(my_data)))
+    print('length of {} is {}'.format(save_file, len(data_lst)))
 
     with open(save_file, 'w', encoding='utf-8') as f:
-        ujson.dump(my_data, f, indent=4, ensure_ascii=False)
+        ujson.dump(data_lst, f, indent=4, ensure_ascii=False)
 
-def split_train_eval_dataset(data_file, save_path, recreate=False) -> None:
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()
+
+def split_train_eval_dataset(data_file, save_path, log, recreate=False) -> None:
     '''
     划分数据集
     '''
+    log_items = []
+    save_log_filename = data_file + "_split.log"    
+    log_items.append('{} {}'.format(sys._getframe().f_code.co_name, data_file))
+    log.info(log_items[-1], save_to_file=True)
+
+    if not recreate and os.path.isfile(save_log_filename):
+        log.info('{} {} skip'.format(sys._getframe().f_code.co_name, data_file), save_to_file=True)
+        return
+        
+    start = time.time()
+
 
     train_file = os.path.join(save_path, 'train.json')
     eval_file = os.path.join(save_path, 'eval.json')
@@ -184,13 +226,19 @@ def split_train_eval_dataset(data_file, save_path, recreate=False) -> None:
     with open(eval_file, 'w', encoding='utf-8') as f:
         ujson.dump(eval_data, f, indent=4, ensure_ascii=False)
 
+    end = time.time()
+    duration = end - start
+    log_items.append('time cost = {:.2f}s'.format(duration))
+    log.info(log_items[-1], save_to_file=True)
+    f = open(save_log_filename, 'w', encoding='utf-8')
+    f.writelines('\n'.join(log_items))
+    f.close()
 
 def make_data_dpo():
-    global log
-    log = Logger('make_data_dpo', save2file=True, file_name='./logs/make_data_dpo.log')
-
+    log = Logger('make_data_dpo', save2file=True, file_name='./logs/make_data_dpo' + '-' + str(time.strftime('%Y%m%d-%H%M', time.localtime())) +'.log')
+    recreate = False
     alpaca_file = './data/raw/alpaca_gpt4_data_zh/alpaca_gpt4_data_zh.json'
-    alpaca_rlhf_file = './data/raw/alpaca_gpt4_data_zh/alpaca_gpt4_data_zh_rlhf.json'
+    alpaca_rlhf_file = './data/tmp/dataset/data_dpo/alpaca_gpt4_data_zh_rlhf/alpaca_gpt4_data_zh_rlhf.json'
     data_files = [
         alpaca_rlhf_file,
         './data/raw/huozi_rlhf/huozi_rlhf_data.json',
@@ -198,17 +246,17 @@ def make_data_dpo():
         './data/raw/rlhf-reward-single-round-trans_chinese/test-00000-of-00001-8ecd46436fadcf7f.parquet',
     ]
     
-    merge_file = './data/result/cbot_dpo_data.json'
-    output_path = './data/result/dpo'
+    merge_file = './data/result/sc_data_dpo.json'
+    output_path = './data/result/sc_data_dpo'
     
     # 1. 生成rejected文本
-    generate_alpaca_gpt4_reject_response(alpaca_file, alpaca_rlhf_file)
+    generate_alpaca_gpt4_reject_response(alpaca_file, alpaca_rlhf_file, log, recreate=recreate)
 
     # 2. 合并数据集
-    merge_rlhf_data(data_files, merge_file)
+    merge_rlhf_data(data_files, merge_file, log, recreate=recreate)
 
     # 3. split train and eval dataset
-    split_train_eval_dataset(merge_file, output_path)
+    split_train_eval_dataset(merge_file, output_path, log, recreate=recreate)
 
 if __name__ == '__main__':
 
