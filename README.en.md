@@ -28,10 +28,10 @@ All datasets are from the single-round conversation dataset published on the Int
 Datasets used include: 
 
 1. Community Q&A JSON version webtext2019zh - large-scale high-quality dataset, see: [nlp_Chinese_corpus](https://github.com/brightmart/nlp_chinese_corpus).
-2. baike_qa2019 encyclopedia questions and answers, see: [baike_qa2019] (https://aistudio.baidu.com/datasetdetail/107726).
+2. baike_qa2019 encyclopedia questions and answers, see: [baike_qa2019](https://aistudio.baidu.com/datasetdetail/107726).
 3. For the Q&A dataset in the field of Chinese medicine, see: [Chinese-medical-dialogue-data](https://github.com/Toyhom/Chinese-medical-dialogue-data).
-4. For Zhihu Q&A data, see: [Zhihu-KOL] (https://huggingface.co/datasets/wangrui6/Zhihu-KOL).
-5. Belle open source instruction training data, introduction: [BELLE] (https://github.com/LianjiaTech/BELLE), download: [BelleGroup] (https://huggingface.co/BelleGroup), select "Belle_open_source_1M", "train_2M_CN" part of the answers are shorter, Data that does not contain complex table structures or translation tasks.
+4. For Zhihu Q&A data, see: [Zhihu-KOL](https://huggingface.co/datasets/wangrui6/Zhihu-KOL).
+5. Belle open source instruction training data, introduction: [BELLE](https://github.com/LianjiaTech/BELLE), download: [BelleGroup](https://huggingface.co/BelleGroup), select "Belle_open_source_1M", "train_2M_CN" part of the answers are shorter, Data that does not contain complex table structures or translation tasks.
 6. Wikipedia entry data, piecing together the entries as prompts, the first 'N' words of the encyclopedia are answers, using the encyclopedia data of '202310'. Wiki download: [zhwiki](https://dumps.wikimedia.org/zhwiki/), convert the downloaded bz2 file to wiki.txt reference: [WikiExtractor](https://github.com/apertium/WikiExtractor). 
 
 Data examples:
@@ -44,7 +44,7 @@ Data examples:
 ### 2.1.2 SFT fine-tuning datasets
 
 Datasets used include: 
-1. Belle's open-source instruction training data, introduction: [BELLE] (https://github.com/LianjiaTech/BELLE), download: [BelleGroup] (https://huggingface.co/BelleGroup), select [generated_chat_0.4M]( https://huggingface.co/datasets/BelleGroup/generated_chat_0.4M)、[train_0.5M_CN](https://huggingface.co/datasets/BelleGroup/train_0.5M_CN)。
+1. Belle's open-source instruction training data, introduction: [BELLE](https://github.com/LianjiaTech/BELLE), download: [BelleGroup](https://huggingface.co/BelleGroup), select [generated_chat_0.4M](https://huggingface.co/datasets/BelleGroup/generated_chat_0.4M)、[train_0.5M_CN](https://huggingface.co/datasets/BelleGroup/train_0.5M_CN)。
 
 Data examples:
 ```json
@@ -56,8 +56,8 @@ Data examples:
 
 ### 2.1.3 DPO Optimization Dataset
 1. Dataset: [alpaca-gpt4-data-en](https://huggingface.co/datasets/c-s-ale/alpaca-gpt4-data-zh), the fine-tuned 'chosen' text comes from the dataset, and the reject text 'rejected' comes from the model output after SFT fine-tuning 1 epoch
-2. Dataset: [huozi_rlhf_data_json] (https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
-3. Dataset: [rlhf-reward-single-round-trans_Chinese] (https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
+2. Dataset: [huozi_rlhf_data_json](https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
+3. Dataset: [rlhf-reward-single-round-trans_Chinese](https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
 
 Data examples:
 ```json
@@ -72,9 +72,9 @@ Data examples:
 
 T5 model (Text-to-Text Transfer Transformer), see the paper: [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683).
 
-The source code of the model is from huggingface, see: [T5ForConditionalGeneration] (https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557).
+The source code of the model is from huggingface, see: [T5ForConditionalGeneration](https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557).
 
-See [model_config.json] (https://huggingface.co/charent/ChatLM-mini-Chinese/blob/main/config.json) for model configuration, the official 'T5-base': 'encoder layer' and 'decoder layer' are both 12 layers, and these two parameters in this project are modified to 10 layers. 
+See [model_config.json](https://huggingface.co/charent/ChatLM-mini-Chinese/blob/main/config.json) for model configuration, the official 'T5-base': 'encoder layer' and 'decoder layer' are both 12 layers, and these two parameters in this project are modified to 10 layers. 
 
 Model parameters: 0.2B.
 
@@ -140,7 +140,7 @@ The project does not assume the risks and responsibilities for data security and
 
 # 5. Thanks
 
-This project refers to the ChatLM-mini-Chinese project and is modified based on this project, and I would like to express my deep gratitude.
+This project refers to the [ChatLM-mini-Chinese](https://github.com/charent/ChatLM-mini-Chinese) project and is modified based on this project, and I would like to express my deep gratitude.
 
 ```conf
 @misc{Charent2023,

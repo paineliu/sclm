@@ -7,7 +7,7 @@
 </div>
  
 # 一、介绍 
-SCLM是一个从头开始训练的中文对话模型。模型参数只有0.2B（算共享权重约210M），可以在最低4GB显存的机器进行预训练（`batch_size=1`，`fp16`或者` bf16`），`float16`加载、推理最少只需要512MB显存。
+SCLM(Small Chat Language Model)是一个从头开始训练的中文对话模型。模型参数只有0.2B（算共享权重约210M），可以在最低4GB显存的机器进行预训练（`batch_size=1`，`fp16`或者` bf16`），`float16`加载、推理最少只需要512MB显存。
 
 项目实现了生成式语言模型的完整训练流程，包括：数据清洗、tokenizer训练、模型预训练、SFT指令微调、RLHF优化等。 
 
@@ -86,7 +86,7 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 内存：128 GB
 显卡：NVIDIA GeForce RTX 4090 Ti 24GB * 1
 ```
-1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`scripts/make_data_train.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_rlhf.py`生成DPO优化数据。
+1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`scripts/make_data_train.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_dpo.py`生成DPO优化数据。
 
 2. **tokenizer 训练**： 执行：`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
 
@@ -140,7 +140,7 @@ curl --location '127.0.0.1:8192/api/chat' \
 
 # 五、感谢
 
-本项目参考了ChatLM-mini-Chinese项目，并基于这个项目修改，在此表示深深的谢意。
+本项目参考了[ChatLM-mini-Chinese](https://github.com/charent/ChatLM-mini-Chinese)项目，并基于这个项目修改，在此表示深深的谢意。
 ```conf
 @misc{Charent2023,
     author={Charent Chen},
