@@ -56,6 +56,9 @@ SCLM(Small Chat Language Model)是一个从头开始训练的中文对话模型�
 ```
 
 ### 2.1.3 DPO优化数据集
+
+使用的数据集包括：
+
 1. 数据集：[alpaca-gpt4-data-zh](https://huggingface.co/datasets/c-s-ale/alpaca-gpt4-data-zh)，微调的`chosen`文本来自数据集，拒绝文本`rejected`来自SFT微调1个epoch后的模型输出
 2. 数据集：[huozi_rlhf_data_json](https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
 3. 数据集：[rlhf-reward-single-round-trans_chinese](https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
@@ -124,6 +127,7 @@ curl --location '127.0.0.1:8192/api/chat' \
 # 三、引用
 
 如果你觉得本项目对你有所帮助，欢迎引用。
+
 ```conf
 @misc{paineliu2024,
     author={liu tingchao},
@@ -140,7 +144,7 @@ curl --location '127.0.0.1:8192/api/chat' \
 
 # 五、感谢
 
-本项目参考了[ChatLM-mini-Chinese](https://github.com/charent/ChatLM-mini-Chinese)项目，并基于这个项目修改，在此表示深深的谢意。
+本项目主要参考了[ChatLM-mini-Chinese](https://github.com/charent/ChatLM-mini-Chinese)，并基于该项目修改，在此向作者表达深深的谢意。
 ```conf
 @misc{Charent2023,
     author={Charent Chen},
@@ -151,4 +155,3 @@ curl --location '127.0.0.1:8192/api/chat' \
     howpublished = {\url{https://github.com/charent/ChatLM-mini-Chinese}},
 }
 ```
-

@@ -55,6 +55,8 @@ Data examples:
 ```
 
 ### 2.1.3 DPO Optimization Dataset
+
+Datasets used include: 
 1. Dataset: [alpaca-gpt4-data-en](https://huggingface.co/datasets/c-s-ale/alpaca-gpt4-data-zh), the fine-tuned 'chosen' text comes from the dataset, and the reject text 'rejected' comes from the model output after SFT fine-tuning 1 epoch
 2. Dataset: [huozi_rlhf_data_json](https://huggingface.co/datasets/Skepsun/huozi_rlhf_data_json)
 3. Dataset: [rlhf-reward-single-round-trans_Chinese](https://huggingface.co/datasets/beyond/rlhf-reward-single-round-trans_chinese)
@@ -79,12 +81,14 @@ See [model_config.json](https://huggingface.co/charent/ChatLM-mini-Chinese/blob/
 Model parameters: 0.2B.
 
 ## 2.3 Training Process
+
 Hardware:
 ```bash
 CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 RAM: 128 GB
 Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 ```
+
 1. Generate Training Data: Place the data file according to the directory structure in the training script, and then execute: scripts/make_data_train.py to generate pre-training data, tools/make_data_sft.py to generate SFT fine-tuning data, and tools/make_data_rlhf.py to generate DPO optimization data after fine-tuning model training.
 
 2. **tokenizer training**: Execute: 'tools/make_token.py' to generate 'tonknizer', the training inventory is in the OOM problem, load 10 million pieces of data, about 100GB memory is required, and the appropriate amount of data can be selected for training according to the hardware situation.
