@@ -58,7 +58,7 @@ class ChatTrainer:
             if ins.lower() in ('yes', 'y'):
 
                 self.accelerator.wait_for_everyone()
-                self.accelerator.save_state(output_dir=self.train_config.latest_state_dir)
+                self.accelerator.save_state(output_dir=self.train_config.latest_state_dir, safe_serialization=False)
 
                 self.accelerator.print('model ckeck point has been saved in {}'.format(self.train_config.latest_state_dir))
         
@@ -374,7 +374,7 @@ class ChatTrainer:
                 best_bleu4 = cur_bleu4_score
                 best_epoch = epoch
                 self.save_model(train_config.output_model_file)
-                accelerator.save_state(output_dir=train_config.best_state_dir)
+                accelerator.save_state(output_dir=train_config.best_state_dir, safe_serialization=False)
 
             # 每个epoch打印一下日志
             if accelerator.is_main_process:

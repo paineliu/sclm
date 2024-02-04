@@ -118,8 +118,8 @@ class ChatBot:
                             search_type='greedy',
                         )
 
-        # print(self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=False))
-        outputs = self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=True)
+        # outputs = self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=True, skip_special_tokens=True)
+        outputs = self.batch_decode(outputs.cpu().numpy(),  clean_up_tokenization_spaces=False, skip_special_tokens=False)
 
         note = "我是一个参数很少的AI模型🥺，知识库较少，无法直接回答您的问题，换个问题试试吧👋"
         outputs = [item if len(item) != 0 else note for item in outputs]
@@ -128,9 +128,12 @@ class ChatBot:
 
 if __name__ == '__main__':
 
-    infer_config = InferConfig(model_file = './output/model/schat_model.bin')
+    infer_config = InferConfig(model_file = './output/model/sc_model_pretrain.bin')
 
     chatbot = ChatBot(infer_config=infer_config)
-
-    print(chatbot.chat('2+3等于5吗?'))
-    print(chatbot.chat('2+3等于几?'))
+    for i in range(5):
+        print(chatbot.chat('2+3等于5吗?'))
+        print(chatbot.chat('2+3等于几?'))
+        print(chatbot.chat('苹果能吃吗?'))
+        print(chatbot.chat('苹果是金属做的吗?'))
+        
