@@ -1,6 +1,3 @@
-import sys
-sys.path.extend(['.','..'])
-
 from typing import Dict, Optional
 import time
 import os 
@@ -12,9 +9,9 @@ from trl import DPOTrainer
 from tokenizers import Tokenizer
 from peft import LoraConfig, TaskType, PeftModel
 
-from sclm.config import DpoConfig, T5ModelConfig
-from sclm.model import TextToTextModel
-from sclm.functions import get_T5_config
+from config import DpoConfig, T5ModelConfig
+from model import TextToTextModel
+from functions import get_T5_config
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 

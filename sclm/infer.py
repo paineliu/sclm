@@ -1,7 +1,7 @@
-import sys
-sys.path.extend(['.', '..'])
-
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+
 from threading import Thread
 from typing import Union
 import torch
@@ -11,8 +11,8 @@ from safetensors.torch import load_model
 
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
-from sclm.model import TextToTextModel
-from sclm.config import InferConfig, T5ModelConfig, get_T5_config
+from model import TextToTextModel
+from config import InferConfig, T5ModelConfig, get_T5_config
 
 class ChatBot:
     def __init__(self, infer_config: InferConfig) -> None:

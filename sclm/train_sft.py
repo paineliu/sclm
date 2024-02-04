@@ -1,11 +1,10 @@
+import os
 import sys
-sys.path.extend(['.','..'])
+sys.path.append(os.path.dirname(__file__))
 
 from typing import Dict
 import time 
-import os 
 import pandas as pd 
-
 import torch
 from datasets import Dataset, load_dataset
 from peft import LoraConfig
@@ -13,8 +12,8 @@ from tqdm import tqdm
 from transformers import PreTrainedTokenizerFast, Seq2SeqTrainer, DataCollatorForSeq2Seq,Seq2SeqTrainingArguments
 from transformers.generation.configuration_utils import GenerationConfig
 
-from sclm.model import TextToTextModel
-from sclm.config import SFTconfig, T5ModelConfig, get_T5_config
+from model import TextToTextModel
+from config import SFTconfig, T5ModelConfig, get_T5_config
 
 tqdm.pandas()
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'

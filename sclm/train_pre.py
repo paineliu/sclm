@@ -1,10 +1,9 @@
+import os
 import sys
-sys.path.extend(['.','..'])
+sys.path.append(os.path.dirname(__file__))
 
 import signal
 import sys
-import os
-import time
 from typing import Union
 import platform 
 from psutil import virtual_memory, cpu_count
@@ -17,11 +16,11 @@ from torch_optimizer import Adafactor
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 
-from sclm.model import TextToTextModel
-from sclm.logger import Logger
-from sclm.dataset import ChatDataset
-from sclm.config import TrainConfig, T5ModelConfig, get_T5_config
-from sclm.functions import (
+from model import TextToTextModel
+from logger import Logger
+from dataset import ChatDataset
+from config import TrainConfig, T5ModelConfig, get_T5_config
+from functions import (
     get_bleu4_score, 
     save_model_config, 
     get_free_space_of_disk, 
