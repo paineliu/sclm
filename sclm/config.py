@@ -33,14 +33,14 @@ class InferConfig:
 @dataclass
 class DpoConfig:
     max_seq_len: int = 512 + 8                  # 8 for eos token 
-    sft_model_file: str = './model_save/'
+    sft_model_file: str = './output/model/sc_model_sft'
 
-    tokenizer_dir: str = './model_save/tokenizer'
+    tokenizer_dir: str = './output/model/sc_model_sft'
 
-    dpo_train_file: str = './data/my_dpo_data.json'
-    dpo_eval_file: str = './data/my_dpo_eval.json'
+    dpo_train_file: str = './data/result/sc_data_dpo/train.json'
+    dpo_eval_file: str = './data/result/sc_data_dpo/eval.json'
 
-    adapter_file: str = './data/dpo/adapter_model.safetensors'
+    # adapter_file: str = './data/dpo/adapter_model.safetensors'
     log_dir: str = './logs/'
 
     per_device_train_batch_size: int = 4
@@ -50,7 +50,7 @@ class DpoConfig:
     logging_first_step: bool = True
     logging_steps: int = 20                      
     save_steps: int = 2000
-    output_dir: str = '/model_save/dpo'
+    output_dir: str = './output/model/sc_model_dpo'
     warmup_steps: int = 1000
     fp16: bool = True
     seed: int = 23333
@@ -61,10 +61,10 @@ class DpoConfig:
 class SFTconfig:
     max_seq_len: int = 384 + 8                # 8 for eos token 
 
-    finetune_from_ckp_file = './output/model/schat_model.bin'
+    finetune_from_ckp_file = './output/model/sc_model_pretrain.bin'
     tokenizer_dir: str  = './output/tokenizer'
-    sft_train_file: str = './data/sft_train.json'
-    output_dir: str     = './output/model/schat_model_sft'
+    sft_train_file: str = './data/result/sc_data_sft/train.json'
+    output_dir: str     = './output/model/sc_model_sft'
 
     batch_size: int = 12
     num_train_epochs: int = 4

@@ -17,3 +17,5 @@ torch_optimizer
 accelerate
 datasketch
 nltk
+trl
+wandb

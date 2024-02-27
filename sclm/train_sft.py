@@ -4,7 +4,9 @@ sys.path.append(os.path.dirname(__file__))
 
 from typing import Dict
 import time 
+import os 
 import pandas as pd 
+import numpy as np
 import torch
 from datasets import Dataset, load_dataset
 from peft import LoraConfig
@@ -14,29 +16,62 @@ from transformers.generation.configuration_utils import GenerationConfig
 
 from model import TextToTextModel
 from config import SFTconfig, T5ModelConfig, get_T5_config
+from transformers.trainer_callback import TrainerControl, TrainerState
+from transformers import TrainingArguments, TrainerCallback
+# coding=utf-8
 
 tqdm.pandas()
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-def get_dataset(file: str, split: str, encode_fn: callable, encode_args: dict,  cache_dir: str='.cache') -> Dataset:
+class MyTrainerCallback(TrainerCallback):
+    log_cnt = 0
+    def on_log(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        '''
+        在打印 n 次日志后清除cuda缓存，适合低显存设备，能防止OOM
+        '''
+        self.log_cnt += 1
+        if self.log_cnt % 2 == 0:
+            torch.cuda.empty_cache()
+    
+    def on_epoch_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        '''
+        在 on_epoch_end 时保存一次模型。
+        TrainingArguments的 save_strategy 中 epoch 和 steps 不兼容。要实现每隔 save_steps 步保存一次检查点，考虑到磁盘空间大小，最多只保存最近N个检查点。
+        '''
+        # 设置should_save=True并返回即可
+        control.should_save = True
+        return control
+    
+def get_dataset(file: str, split: str, tokenizer: PreTrainedTokenizerFast, cache_dir: str='.cache') -> Dataset:
     """
-    Load a dataset
+    加载数据集
     """
+
+    # 加载json数据集，如果要加载parquet，更改为'parquet'即可
     dataset = load_dataset('json', data_files=file,  split=split, cache_dir=cache_dir)
 
-    def merge_prompt_and_responses(sample: dict) -> Dict[str, str]:
-        # add an eos token note that end of sentence, using in generate.
-        prompt = encode_fn(sample['prompt'] + '[EOS]', **encode_args)
-        response = encode_fn(sample['response'] + '[EOS]', **encode_args)
+    def tokens_to_ids(samples: dict) -> Dict[str, str]:
+
+        eos_token_id = tokenizer.eos_token_id
+
+        batch_prompt = samples['prompt']
+        batch_response = samples['response']
+
+        encoded_prompt = tokenizer(batch_prompt, truncation=False, padding=False, return_attention_mask=False)
+        encoded_response = tokenizer(batch_response, truncation=False, padding=False, return_attention_mask=False)
+
+        # vocab size 小于65535 可以用 uint16, 每个样本都要添加eos_token_id
+        input_ids = [np.array(item + [eos_token_id], dtype=np.uint16) for item in encoded_prompt["input_ids"]]
+        labels = [np.array(item + [eos_token_id], dtype=np.uint16) for item in encoded_response["input_ids"]]
+
         return {
-            'input_ids': prompt.input_ids,
-            'input_mask': prompt.attention_mask,
-            'labels': response.input_ids,
+            'input_ids': input_ids,
+            'labels': labels,
         }
 
-    dataset = dataset.map(merge_prompt_and_responses)
-    return dataset
+    dataset = dataset.map(tokens_to_ids, batched=True, batch_size=8192, remove_columns=dataset.column_names)
 
+    return dataset
 
 def sft_train(config: SFTconfig) -> None:
 
@@ -55,12 +90,7 @@ def sft_train(config: SFTconfig) -> None:
         model.load_state_dict(torch.load(config.finetune_from_ckp_file, map_location='cpu')) # set cpu for no exception
 
     # Step 4: Load the dataset
-    encode_args = {
-        'truncation': False,
-        'padding': 'max_length',
-    }
-
-    dataset = get_dataset(file=config.sft_train_file, encode_fn=tokenizer.encode_plus, encode_args=encode_args, split="train")
+    dataset = get_dataset(file=config.sft_train_file, split="train", tokenizer=tokenizer)
 
     # Step 5: Define the training arguments
     # T5属于sequence to sequence模型，故要使用Seq2SeqTrainingArguments、DataCollatorForSeq2Seq、Seq2SeqTrainer
@@ -97,15 +127,16 @@ def sft_train(config: SFTconfig) -> None:
 
     # step 6: init a collator
     collator = DataCollatorForSeq2Seq(tokenizer, max_length=config.max_seq_len)
-    
+    empty_cuda_cahce = MyTrainerCallback()
+
     # Step 7: Define the Trainer
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
         train_dataset=dataset,
-        eval_dataset=dataset,
         tokenizer=tokenizer,
         data_collator=collator,
+        callbacks=[empty_cuda_cahce]
     )
 
     # step 8: train
@@ -114,7 +145,10 @@ def sft_train(config: SFTconfig) -> None:
     )
 
     loss_log = pd.DataFrame(trainer.state.log_history)
-    loss_log.to_csv(f"./logs/sft_train_log_{time.strftime('%Y%m%d-%H%M')}.csv")
+    log_dir = './logs'
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+    loss_log.to_csv(f"{log_dir}/sft_train_log_{time.strftime('%Y%m%d-%H%M')}.csv")
 
     # Step 9: Save the model
     trainer.save_model(config.output_dir)
