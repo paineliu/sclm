@@ -68,5 +68,5 @@ def plot_train_loss(log_file: str, start_date: str, end_date: str, pic_save_to_f
 
 if __name__ == '__main__':
     
-    plot_train_loss('./logs/chat_trainer-20231011.log', '[2023-10-11 11:04:53.960]', '[2023-10-18 01:41:40.540]', pic_save_to_file='./img/train_loss.png')
-    plot_train_loss('./logs/chat_trainer-20231018.log', '[2023-10-18 02:06:28.137]', '[2023-10-18 18:03:35.230]', pic_save_to_file='./img/finetune_loss.png')
+    plot_train_loss('./logs/train_pre-20240202-1733.log', '[2024-02-02 17:04:53.960]', '[2024-02-18 01:41:40.540]', pic_save_to_file='./img/train_loss.png')
+    # plot_train_loss('./logs/chat_trainer-20231018.log', '[2023-10-18 02:06:28.137]', '[2023-10-18 18:03:35.230]', pic_save_to_file='./img/finetune_loss.png')

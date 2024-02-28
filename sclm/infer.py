@@ -142,5 +142,9 @@ if __name__ == '__main__':
         chat(chatbot, '苹果能吃吗?')
         chat(chatbot, '苹果是金属做的吗?')
         chat(chatbot, '中国的首都是哪里?')
+        chat(chatbot, '地球和月球的平均距离?')
+        chat(chatbot, '地球和太阳的平均距离?')
+        chat(chatbot, '地球和猫狗星的平均距离?')
+        chat(chatbot, '刘备是谁?')
         break
         
