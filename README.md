@@ -98,18 +98,18 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
     ![traing loss](img/train_loss.png) 
 
 4. **prompt监督微调（SFT）**：执行`sclm/train_sft.py`进行SFT微调。 
-5. 
+
     学习率为`1e-7`到`5e-5`的动态学习率，微调时间2天。微调损失： 
    
     ![finetune loss](img/train_sft_loss.png) 
 
-6. **dpo直接偏好优化**：执行`sclm/train_dpo.py`进行模型偏好优化。 
+5. **dpo直接偏好优化**：执行`sclm/train_dpo.py`进行模型偏好优化。 
 
     模型偏好优化耗时5h。dpo损失： 
  
     ![dpo loss](img/train_dpo_loss.png) 
 
-7. **运行效果展示**：执行`sclm/infer.py`。 
+6. **运行效果展示**：执行`sclm/infer.py`。 
 ```bash
 python sclm/cli_infer.py
 
