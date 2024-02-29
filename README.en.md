@@ -101,7 +101,7 @@ Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 
 4. **Prompt Supervised Fine-Tuning (SFT)**: Execute `sclm/train_sft.py` to perform SFT fine-tuning. 
     The learning rate is a dynamic learning rate from '1e-7' to '5e-5', and the fine-tuning time is 2 days. Fine-tuning loss:
-     
+
     ![finetune loss](img/train_sft_loss.png) 
 
 5. **DPO Direct Preference Optimization**: Execute `sclm/trainer_dpo.py` for model preference optimization. 
@@ -127,7 +127,7 @@ python sclm/infer.py
 
 ```
 
-## 2.4 Instruction
+## 2.4 Usage
 
 By default, the 'TextIteratorStreamer' of 'huggingface transformers' is used to implement streaming conversations, only 'greedy search' is supported, if you need other generation methods such as 'beam sample', please modify the 'stream_chat' parameter of `cli_demo.py` to 'False'.
 
