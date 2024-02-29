@@ -78,7 +78,7 @@ T5模型（Text-to-Text Transfer Transformer），详情见论文: [Exploring th
 
 模型源码来自huggingface，见：[T5ForConditionalGeneration](https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557)。
 
-官方的`T5-base`：`encoder layer`和`decoder layer `均为为12层。本项目这两个参数修改为10层，模型参数：0.2B。
+官方的`T5-base`：`encoder layer`和`decoder layer`均为为12层。本项目这两个参数修改为10层，模型参数：0.2B。
 
 ## 2.3 训练过程
 硬件：
@@ -89,28 +89,29 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 ```
 1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`tools/make_data_pre.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_dpo.py`生成DPO优化数据。
 
-2. **tokenizer 训练**： 执行：`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
+2. **tokenizer 训练**： 执行`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
 
-3. **Text-to-Text 预训练**：执行：`sclm/train_pre.py`进行模型预训练。
+3. **Text-to-Text 预训练**：执行`sclm/train_pre.py`进行模型预训练。
 
     学习率为`1e-4`到`5e-3`的动态学习率，预训练时间为15天。训练损失： 
 
     ![traing loss](img/train_loss.png) 
 
-4. **prompt监督微调（SFT）**：执行：`sclm/train_sft.py`进行SFT微调。 
+4. **prompt监督微调（SFT）**：执行`sclm/train_sft.py`进行SFT微调。 
+5. 
     学习率为`1e-7`到`5e-5`的动态学习率，微调时间2天。微调损失： 
    
     ![finetune loss](img/train_sft_loss.png) 
 
-5. **dpo直接偏好优化**：执行：`sclm/train_dpo.py`进行模型偏好优化。 
+6. **dpo直接偏好优化**：执行`sclm/train_dpo.py`进行模型偏好优化。 
 
     模型偏好优化耗时5h。dpo损失： 
  
     ![dpo loss](img/train_dpo_loss.png) 
 
-6. **运行效果展示**：执行：`sclm/infer.py`。 
+7. **运行效果展示**：执行`sclm/infer.py`。 
 ```bash
-python sclm/cli_demo.py
+python sclm/cli_infer.py
 
 2+3等于5吗?
 2 + 3 等于 5 。 这是一个基本的数学问题, 其中 2 是加数, 3 是合数 。 在数学中, 加法是一种基本的运算, 用于将两个或多个数字相加以获得它们的总和 。 在这个问题中, 数字 2 和数字 3 是两个加数, 它们相加得到 5 。 因此, 答案是 5 。
