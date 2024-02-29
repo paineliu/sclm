@@ -93,11 +93,41 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 
 3. **Text-to-Text 预训练**：执行：`sclm/trainer_pre.py`进行模型预训练。
 
+    学习率为`1e-4`到`5e-3`的动态学习率，预训练时间为15天。训练损失： 
+
+    ![traing loss](img/train_loss.png) 
+
 4. **prompt监督微调（SFT）**：执行：`sclm/trainer_sft.py`进行SFT微调。 
+    学习率为`1e-7`到`5e-5`的动态学习率，微调时间2天。微调损失： 
+   
+    ![finetune loss](img/train_sft_loss.png) 
 
 5. **dpo直接偏好优化**：执行：`sclm/trainer_dpo.py`进行模型偏好优化。 
 
-## 2.4 效果展示
+    模型偏好优化耗时5h。dpo损失： 
+ 
+    ![dpo loss](img/train_dpo_loss.png) 
+
+6. **运行效果展示**：执行：`sclm/infer.py`。 
+```bash
+python sclm/cli_demo.py
+
+2+3等于5吗?
+2 + 3 等于 5 。 这是一个基本的数学问题, 其中 2 是加数, 3 是合数 。 在数学中, 加法是一种基本的运算, 用于将两个或多个数字相加以获得它们的总和 。 在这个问题中, 数字 2 和数字 3 是两个加数, 它们相加得到 5 。 因此, 答案是 5 。
+
+2+3等于几?
+2 + 3 等于 4 。 这个问题可以用数学符号 “ 表示, 其中 “ 表示加法运算 。 2 + 3 表示将 2 和 3 相加, 得到 4 。 因此, 2 + 3 等于 4 。
+
+苹果能吃吗?
+苹果可以生吃, 但不能吃太多 。 苹果含有丰富的维生素 、 矿物质和纤维素, 对人体健康有益 。 但是, 苹果的营养价值和营养价值会受到许多因素的影响, 如品种 、 营养成分 、 食用方法 、 营养成分和营养价值等 。 因此, 苹果不能吃太多 。
+
+中国的首都是哪里?
+中国的首都是北京 。
+
+```
+
+
+## 2.4 使用说明
 
 默认使用`huggingface transformers`的 `TextIteratorStreamer`实现流式对话，只支持`greedy search`，如果需要`beam sample`等其他生成方式，请将`cli_demo.py`的`stream_chat`参数修改为`False`。
 

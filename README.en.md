@@ -89,17 +89,45 @@ RAM: 128 GB
 Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 ```
 
-1. Generate Training Data: Place the data file according to the directory structure in the training script, and then execute: scripts/make_data_train.py to generate pre-training data, tools/make_data_sft.py to generate SFT fine-tuning data, and tools/make_data_rlhf.py to generate DPO optimization data after fine-tuning model training.
+1. **Generate Training Data**: Place the data file according to the directory structure in the training script, and then execute: scripts/make_data_train.py to generate pre-training data, tools/make_data_sft.py to generate SFT fine-tuning data, and tools/make_data_rlhf.py to generate DPO optimization data after fine-tuning model training.
 
 2. **tokenizer training**: Execute: 'tools/make_token.py' to generate 'tonknizer', the training inventory is in the OOM problem, load 10 million pieces of data, about 100GB memory is required, and the appropriate amount of data can be selected for training according to the hardware situation.
 
 3. **Text-to-Text Pre-training**: Execute: 'sclm/trainer_pre.py' to pre-train the model.
 
-4. Prompt Supervised Fine-Tuning (SFT): Execute: 'sclm/trainer_sft.py' to perform SFT fine-tuning. 
+    The learning rate is a dynamic learning rate of '1e-4' to '5e-3', and the pre-training time is 15 days. Training Loss: 
 
-5. DPO Direct Preference Optimization: Execute: 'SCLM/trainer_dpo.py' for model preference optimization. 
+    ![traing loss](img/train_loss.png) 
 
-## 2.4 Effect Display
+4. **Prompt Supervised Fine-Tuning (SFT)**: Execute: 'sclm/trainer_sft.py' to perform SFT fine-tuning. 
+    The learning rate is a dynamic learning rate from '1e-7' to '5e-5', and the fine-tuning time is 2 days. 
+    
+    Fine-tuning loss: 
+    ![finetune loss](img/train_sft_loss.png) 
+5. **DPO Direct Preference Optimization**: Execute: 'sclm/trainer_dpo.py' for model preference optimization. 
+    The model preference optimization took 5 hours. DPO Losses: 
+ 
+    ![dpo loss](img/train_dpo_loss.png) 
+
+6. **Examples**：执行：`sclm/infer.py`。 
+```bash
+python sclm/infer.py
+
+2+3等于5吗?
+2 + 3 等于 5 。 这是一个基本的数学问题, 其中 2 是加数, 3 是合数 。 在数学中, 加法是一种基本的运算, 用于将两个或多个数字相加以获得它们的总和 。 在这个问题中, 数字 2 和数字 3 是两个加数, 它们相加得到 5 。 因此, 答案是 5 。
+
+2+3等于几?
+2 + 3 等于 4 。 这个问题可以用数学符号 “ 表示, 其中 “ 表示加法运算 。 2 + 3 表示将 2 和 3 相加, 得到 4 。 因此, 2 + 3 等于 4 。
+
+苹果能吃吗?
+苹果可以生吃, 但不能吃太多 。 苹果含有丰富的维生素 、 矿物质和纤维素, 对人体健康有益 。 但是, 苹果的营养价值和营养价值会受到许多因素的影响, 如品种 、 营养成分 、 食用方法 、 营养成分和营养价值等 。 因此, 苹果不能吃太多 。
+
+中国的首都是哪里?
+中国的首都是北京 。
+
+```
+
+## 2.4 Instruction
 
 By default, the 'TextIteratorStreamer' of 'huggingface transformers' is used to implement streaming conversations, only 'greedy search' is supported, if you need other generation methods such as 'beam sample', please modify the 'stream_chat' parameter of 'cli_demo.py' to 'False'.
 
