@@ -76,7 +76,7 @@ T5 model (Text-to-Text Transfer Transformer), see the paper: [Exploring the Limi
 
 The source code of the model is from huggingface, see: [T5ForConditionalGeneration](https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py#L1557).
 
-The official 'T5-base': 'encoder layer' and 'decoder layer' are both 12 layers, and these two parameters in this project are modified to 10 layers. 
+The official `T5-base`: `encoder layer` and `decoder layer` are both 12 layers, and these two parameters in this project are modified to 10 layers. 
 
 Model parameters: 0.2B.
 
@@ -89,22 +89,23 @@ RAM: 128 GB
 Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 ```
 
-1. **Generate Training Data**: Place the data file according to the directory structure in the training script, and then execute: scripts/make_data_train.py to generate pre-training data, tools/make_data_sft.py to generate SFT fine-tuning data, and tools/make_data_rlhf.py to generate DPO optimization data after fine-tuning model training.
+1. **Generate Training Data**: Place the data file according to the directory structure in the training script, and then execute: `scripts/make_data_pre.py` to generate pre-training data, `tools/make_data_sft.py` to generate SFT fine-tuning data, and `tools/make_data_dpo.py` to generate DPO optimization data after fine-tuning model training.
 
-2. **tokenizer training**: Execute: 'tools/make_token.py' to generate 'tonknizer', the training inventory is in the OOM problem, load 10 million pieces of data, about 100GB memory is required, and the appropriate amount of data can be selected for training according to the hardware situation.
+2. **tokenizer training**: Execute: `tools/make_token.py` to generate 'tonknizer', the training inventory is in the OOM problem, load 10 million pieces of data, about 100GB memory is required, and the appropriate amount of data can be selected for training according to the hardware situation.
 
-3. **Text-to-Text Pre-training**: Execute: 'sclm/trainer_pre.py' to pre-train the model.
+3. **Text-to-Text Pre-training**: Execute: `sclm/train_pre.py` to pre-train the model.
 
     The learning rate is a dynamic learning rate of '1e-4' to '5e-3', and the pre-training time is 15 days. Training Loss: 
 
     ![traing loss](img/train_loss.png) 
 
-4. **Prompt Supervised Fine-Tuning (SFT)**: Execute: 'sclm/trainer_sft.py' to perform SFT fine-tuning. 
+4. **Prompt Supervised Fine-Tuning (SFT)**: Execute: `sclm/train_sft.py` to perform SFT fine-tuning. 
     The learning rate is a dynamic learning rate from '1e-7' to '5e-5', and the fine-tuning time is 2 days. 
     
     Fine-tuning loss: 
     ![finetune loss](img/train_sft_loss.png) 
-5. **DPO Direct Preference Optimization**: Execute: 'sclm/trainer_dpo.py' for model preference optimization. 
+
+5. **DPO Direct Preference Optimization**: Execute: `sclm/trainer_dpo.py` for model preference optimization. 
     The model preference optimization took 5 hours. DPO Losses: 
  
     ![dpo loss](img/train_dpo_loss.png) 
@@ -129,7 +130,7 @@ python sclm/infer.py
 
 ## 2.4 Instruction
 
-By default, the 'TextIteratorStreamer' of 'huggingface transformers' is used to implement streaming conversations, only 'greedy search' is supported, if you need other generation methods such as 'beam sample', please modify the 'stream_chat' parameter of 'cli_demo.py' to 'False'.
+By default, the 'TextIteratorStreamer' of 'huggingface transformers' is used to implement streaming conversations, only 'greedy search' is supported, if you need other generation methods such as 'beam sample', please modify the 'stream_chat' parameter of `cli_demo.py` to 'False'.
 
 1. Console Operation
 ```bash

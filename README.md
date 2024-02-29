@@ -87,11 +87,11 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 内存：128 GB
 显卡：NVIDIA GeForce RTX 4090 Ti 24GB * 1
 ```
-1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`scripts/make_data_train.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_dpo.py`生成DPO优化数据。
+1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`tools/make_data_pre.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_dpo.py`生成DPO优化数据。
 
 2. **tokenizer 训练**： 执行：`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
 
-3. **Text-to-Text 预训练**：执行：[train_pre.py](sclm/train_pre.py)进行模型预训练。
+3. **Text-to-Text 预训练**：执行：`sclm/train_pre.py`进行模型预训练。
 
     学习率为`1e-4`到`5e-3`的动态学习率，预训练时间为15天。训练损失： 
 
