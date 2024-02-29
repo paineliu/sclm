@@ -93,7 +93,7 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 
 3. **Text-to-Text 预训练**：执行`sclm/train_pre.py`进行模型预训练。
 
-    学习率为`1e-4`到`5e-3`的动态学习率，预训练时间为15天。训练损失： 
+    学习率为`1e-4`到`5e-3`的动态学习率，预训练时间为13天。训练损失： 
 
     ![traing loss](img/train_loss.png) 
 

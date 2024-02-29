@@ -95,7 +95,7 @@ Graphics card: NVIDIA GeForce RTX 4090 Ti 24GB*1
 
 3. **Text-to-Text Pre-training**: Execute `sclm/train_pre.py` to pre-train the model.
 
-    The learning rate is a dynamic learning rate of '1e-4' to '5e-3', and the pre-training time is 15 days. Training Loss: 
+    The learning rate is a dynamic learning rate of '1e-4' to '5e-3', and the pre-training time is 13 days. Training Loss: 
 
     ![traing loss](img/train_loss.png) 
 
