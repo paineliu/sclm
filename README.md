@@ -111,7 +111,7 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 
 6. **运行效果展示**：执行`sclm/infer.py`。 
 ```bash
-python sclm/cli_infer.py
+python sclm/infer.py
 
 2+3等于5吗?
 2 + 3 等于 5 。 这是一个基本的数学问题, 其中 2 是加数, 3 是合数 。 在数学中, 加法是一种基本的运算, 用于将两个或多个数字相加以获得它们的总和 。 在这个问题中, 数字 2 和数字 3 是两个加数, 它们相加得到 5 。 因此, 答案是 5 。
@@ -127,10 +127,9 @@ python sclm/cli_infer.py
 
 ```
 
-
 ## 2.4 使用说明
 
-默认使用`huggingface transformers`的 `TextIteratorStreamer`实现流式对话，只支持`greedy search`，如果需要`beam sample`等其他生成方式，请将`cli_demo.py`的`stream_chat`参数修改为`False`。
+默认使用`huggingface transformers`的 `TextIteratorStreamer`实现流式对话，只支持`greedy search`，如果需要`beam sample`等其它生成方式，请将`cli_demo.py`的`stream_chat`参数修改为`False`。
 
 1. 控制台运行：
 ```bash
