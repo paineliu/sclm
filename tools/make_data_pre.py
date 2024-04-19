@@ -1040,7 +1040,7 @@ def make_data_pre():
     process_chinese_medical('./data/raw/chinese_medical', './data/tmp/dataset/data_pre/chinese_medical_utf8', './data/tmp/dataset/data_pre/chinese_medical_uft8.parquet', log, recreate=recreate, response_less_word=15)
     process_web_text_zh('./data/raw/web_text_zh', './data/tmp/dataset/data_pre/web_text_zh.parquet', log, recreate=recreate, keep_start=5, response_less_word=15)
     process_baike_qa('./data/raw/baike_qa', './data/tmp/dataset/data_pre/baike_qa.parquet', log, recreate=recreate, response_less_word=15)
-    process_zhihu_kol('./data/raw/zhihu_kol','./data/tmp/dataset/data_pre//zhihu_kol.parquet', log, recreate=recreate, prompt_less_word=4, response_less_word=10)
+    process_zhihu_kol('./data/raw/zhihu_kol','./data/tmp/dataset/data_pre/zhihu_kol.parquet', log, recreate=recreate, prompt_less_word=4, response_less_word=10)
     process_belle_knowledge('./data/raw/belle_knowledge', './data/tmp/dataset/data_pre/belle_knowledge.parquet', log, recreate=recreate, response_less_words=5)
     process_zh_wiki('./data/raw/zhwiki/wiki.txt', './data/tmp/dataset/data_pre/zhwiki_cn.parquet', './data/tmp/dataset/data_pre/zhwiki_cn/zhwiki_cn.txt', log, recreate=recreate, groups_cnt=10000, max_len=512)
 
