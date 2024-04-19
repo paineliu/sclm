@@ -88,12 +88,19 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 显卡：NVIDIA GeForce RTX 4090 Ti 24GB * 1
 ```
 ### 脚本执行步骤：
-1、将训练数据放到将`./data/raw`目录下
+
+1、将训练数据放到将`./data/raw`目录下；
+
 2、执行:`tools/make_data_pre.py`生成预训练数据；
+
 3、执行:`tools/make_token.py`生成`tonknizer`;
+
 4、执行:`tools/make_data_sft.py`生成SFT微调数据;
+
 5、执行:`sclm/train_pre.py`进行模型预训练;
+
 6、执行:`tools/make_data_dpo.py`生成DPO优化数据;
+
 7、执行:`sclm/train_sft.py`进行SFT微调。
 
 ### 脚本功能说明：
