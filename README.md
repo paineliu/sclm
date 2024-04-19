@@ -87,6 +87,17 @@ CPU: 28 vCPU Intel(R) Xeon(R) Gold 6330 CPU @ 2.00GHz
 内存：128 GB
 显卡：NVIDIA GeForce RTX 4090 Ti 24GB * 1
 ```
+### 脚本执行步骤：
+1、将训练数据放到将`./data/raw`目录下
+2、执行:`tools/make_data_pre.py`生成预训练数据；
+3、执行:`tools/make_token.py`生成`tonknizer`;
+4、执行:`tools/make_data_sft.py`生成SFT微调数据;
+5、执行:`sclm/train_pre.py`进行模型预训练;
+6、执行:`tools/make_data_dpo.py`生成DPO优化数据;
+7、执行:`sclm/train_sft.py`进行SFT微调。
+
+### 脚本功能说明：
+
 1. **生成训练数据**： 将数据文件按照训练脚本中的目录结构放置，然后执行：`tools/make_data_pre.py`生成预训练数据；执行`tools/make_data_sft.py`生成SFT微调数据，在微调模型训练后，执行`tools/make_data_dpo.py`生成DPO优化数据。
 
 2. **tokenizer 训练**： 执行`tools/make_token.py`生成`tonknizer`，训练库存在OOM问题，加载1000万条数据，大约需要100GB内存，可以根据硬件情况，选取合适数量的数据进行训练。
@@ -183,3 +194,6 @@ curl --location '127.0.0.1:8192/api/chat' \
     howpublished = {\url{https://github.com/charent/ChatLM-mini-Chinese}},
 }
 ```
+
+
+    
